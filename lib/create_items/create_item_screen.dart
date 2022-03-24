@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_challege/create_items/create_item_cubit.dart';
 import 'package:flutter_challege/create_items/exceptions/item_already_exists.dart';
 import 'package:flutter_challege/widgets/loading_dialog.dart';
+import 'package:flutter_challege/widgets/menu_drawer.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -22,7 +23,7 @@ class CreateItemScreen extends StatefulWidget {
 class _CreateItemScreen extends State<CreateItemScreen> {
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
-  String? error;
+  // String? error;
   File? image;
   bool isLoading = false;
   Map<String, String>? args;
@@ -41,6 +42,7 @@ class _CreateItemScreen extends State<CreateItemScreen> {
             appBar: AppBar(
               title: Text(widget.title),
             ),
+            drawer: const MenuDrawer(),
             body: FormBlocListener<CreateItemCubit, String, Exception>(
                 key: _formkey,
                 onSubmitting: (context, state) {
