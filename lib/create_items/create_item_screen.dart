@@ -3,12 +3,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_challege/create_items/create_item_cubit.dart';
+import 'package:flutter_challege/create_items/exceptions/item_already_exists.dart';
 import 'package:flutter_challege/widgets/loading_dialog.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../widgets/custom_text_field.dart';
 import 'create_item_repository.dart';
+import 'exceptions/empty_image.dart';
 
 class CreateItemScreen extends StatefulWidget {
   final String title = 'Create Item';
@@ -30,7 +32,8 @@ class _CreateItemScreen extends State<CreateItemScreen> {
     return BlocProvider(
       create: (context) => CreateItemCubit(CreateItemRepository()),
       child: Builder(builder: (context) {
-        args = ModalRoute.of(context)!.settings.arguments as Map<String, String>?;
+        args =
+            ModalRoute.of(context)!.settings.arguments as Map<String, String>?;
         Size size = MediaQuery.of(context).size;
         final formBloc = BlocProvider.of<CreateItemCubit>(context);
         return Scaffold(
@@ -45,50 +48,65 @@ class _CreateItemScreen extends State<CreateItemScreen> {
                 },
                 onSuccess: (context, state) {
                   LoadingDialog.hide(context);
-                  const snackBar = SnackBar(
-                    content: Text('Item created successfully'),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text("Item created successfully"),
+                    duration: Duration(seconds: 2),
+                  ));
+                },
+                onFailure: (context, state) {
+                  LoadingDialog.hide(context);
+                  if(state.failureResponse is ItemAlreadyExistsException){
+                    formBloc.name.addFieldError("An item with this name already exists");
+                  }
+                  else if(state.failureResponse is EmptyImageException){
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Item image must not be empty"),
+                      duration: Duration(seconds: 2),
+                    ));
+                  }else {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                          "Something went wrong. Please try again: ${state
+                              .failureResponse!.toString()}"),
+                      duration: Duration(seconds: 2),
+                    ));
+                  }
                 },
                 child: SingleChildScrollView(
                   // physics: const ClampingScrollPhysics(),
-                  padding: const EdgeInsets.only(top: 40.0, left: 24, right: 24),
+                  padding:
+                      const EdgeInsets.only(top: 40.0, left: 24, right: 24),
                   child: Column(
                     children: <Widget>[
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                              onTap: () async {
-                                if (!isLoading) {
-                                  await pickImage();
-                                }
-                              },
-                              child: Container(
-                                  child: ClipRRect(
-                                child: image != null
-                                    ? Image.file(image!,
-                                        width: 100,
-                                        height: 100,
-                                        fit: BoxFit.cover)
-                                    : const Image(
-                                        image: AssetImage(
-                                            'assets/images/add-image-icon.png'),
-                                        width: 100,
-                                        height: 100,
-                                        fit: BoxFit.cover),
-                              ))),
-                        ],
-                      ),
+                      GestureDetector(
+                          onTap: () async {
+                            await pickImage(formBloc);
+                          },
+                          child: BlocBuilder(
+                            bloc: formBloc,
+                            builder: (context, state) => ClipRRect(
+                              child: formBloc.image != null
+                                  ? Image.file(formBloc.image!,
+                                      width: 136.0,
+                                      height: 136.0,
+                                      fit: BoxFit.cover)
+                                  : const Image(
+                                      image: AssetImage(
+                                          'assets/images/add-image-icon.png'),
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover),
+                            ),
+                          )),
                       SizedBox(height: 10),
                       CustomTextField(
-                          key: Key("nameField"),
-                          bloc: formBloc.name,
-                          isEnabled: !isLoading,
-                          keyboard: TextInputType.name,
-                          label: "Item name",
-                          hint: 'Enter an item name',
-                          // icon: Icon(Icons.email)
+                        key: Key("nameField"),
+                        bloc: formBloc.name,
+                        isEnabled: !isLoading,
+                        keyboard: TextInputType.name,
+                        label: "Item name",
+                        hint: 'Enter an item name',
+                        // icon: Icon(Icons.email)
                       ),
                       CustomTextField(
                         key: Key("categoryField"),
@@ -114,8 +132,8 @@ class _CreateItemScreen extends State<CreateItemScreen> {
                                     backgroundColor:
                                         MaterialStateProperty.all<Color>(
                                             Colors.black87),
-                                    side: MaterialStateProperty.all<
-                                        BorderSide>(BorderSide.none)),
+                                    side: MaterialStateProperty.all<BorderSide>(
+                                        BorderSide.none)),
                               ),
                             )
                           : CircularProgressIndicator(),
@@ -126,19 +144,38 @@ class _CreateItemScreen extends State<CreateItemScreen> {
     );
   }
 
-  Future pickImage() async {
+  // Future pickImage() async {
+  //   try {
+  //     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+  //     if (image == null) return;
+  //
+  //     final imageTemporary = File(image.path);
+  //     setState(() {
+  //       this.image = imageTemporary;
+  //     });
+  //   } on PlatformException catch (e) {
+  //     setState(() {
+  //       this.error = 'Failed to pick image: $e';
+  //     });
+  //   }
+  // }
+
+  Future pickImage(CreateItemCubit formBloc) async {
     try {
       final image = await ImagePicker().pickImage(source: ImageSource.gallery);
       if (image == null) return;
 
       final imageTemporary = File(image.path);
+      formBloc.image = imageTemporary;
+
       setState(() {
         this.image = imageTemporary;
       });
     } on PlatformException catch (e) {
-      setState(() {
-        this.error = 'Failed to pick image: $e';
-      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Failed to pick image: $e"),
+        duration: Duration(seconds: 2),
+      ));
     }
   }
 }

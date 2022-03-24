@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_challege/create_items/item_model.dart';
 import 'package:flutter_challege/utils/form_validators.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 
 import 'create_item_repository.dart';
+import 'exceptions/empty_image.dart';
 
 class CreateItemCubit extends FormBloc<String, Exception> {
 
@@ -22,16 +24,18 @@ class CreateItemCubit extends FormBloc<String, Exception> {
     ],
   );
 
-  final imageUrl = TextFieldBloc(
-    name: "imageUrl",
-    validators: [
-      // FieldValidators.required,
-    ],
-  );
+  // final imageUrl = TextFieldBloc(
+  //   name: "imageUrl",
+  //   validators: [
+  //     // FieldValidators.required,
+  //   ],
+  // );
+
+  File? image;
 
   final CreateItemRepository _createItemRepository;
   CreateItemCubit(this._createItemRepository) {
-    addFieldBlocs(fieldBlocs: [name, category, imageUrl]);
+    addFieldBlocs(fieldBlocs: [name, category]);
   }
 
   void createItem(ItemModel item) async {
@@ -47,15 +51,16 @@ class CreateItemCubit extends FormBloc<String, Exception> {
   @override
   FutureOr<void> onSubmitting() async {
     try {
-      print("submiting");
-      print(name.value);
-      await _createItemRepository.createItem(name.value, category.value, imageUrl.value);
+      if(image==null){
+        throw Exception("la imagen no puede");
+      }
+      await _createItemRepository.createItem(name.value, category.value, image);
       name.clear();
       category.clear();
-      imageUrl.clear();
+      image = null;
       emitSuccess();
-    } catch (e) {
-      rethrow;
+    } on Exception catch (e) {
+      emitFailure(failureResponse: e);
     }
   }
 }
