@@ -10,6 +10,7 @@ import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../widgets/custom_text_field.dart';
+import '../widgets/form_field_tag.dart';
 import 'create_item_repository.dart';
 import 'exceptions/empty_image.dart';
 
@@ -101,22 +102,24 @@ class _CreateItemScreen extends State<CreateItemScreen> {
                             ),
                           )),
                       SizedBox(height: 10),
+                      FormFieldTag(name: "Name"),
                       CustomTextField(
                         key: Key("nameField"),
                         bloc: formBloc.name,
                         isEnabled: !isLoading,
                         keyboard: TextInputType.name,
-                        label: "Item name",
+                        label: "Enter a name",
                         hint: 'Enter an item name',
                         // icon: Icon(Icons.email)
                       ),
+                      FormFieldTag(name: "Category"),
                       CustomTextField(
                         key: Key("categoryField"),
                         bloc: formBloc.category,
                         isEnabled: !isLoading,
                         keyboard: TextInputType.name,
-                        label: "Category",
-                        hint: 'Enter a category',
+                        label: "Enter a category",
+                        hint: 'Enter an item category',
                         // icon: Icon(Icons.email)
                       ),
                       !this.isLoading
