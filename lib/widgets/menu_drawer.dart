@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_challege/create_items/create_item_screen.dart';
 
+import '../create_categories/create_category_screen.dart';
+
 class MenuDrawer extends StatelessWidget {
   // static void show(BuildContext context, {Key? key}) => showDialog<void>(
   //   context: context,
@@ -46,7 +48,10 @@ class MenuDrawer extends StatelessWidget {
           ListTile(
             title: const Text('Create category'),
             onTap: () {
-              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CreateCategoryScreen()),
+              );
             },
           ),
         ],

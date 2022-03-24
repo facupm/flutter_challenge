@@ -146,22 +146,6 @@ class _CreateItemScreen extends State<CreateItemScreen> {
     );
   }
 
-  // Future pickImage() async {
-  //   try {
-  //     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-  //     if (image == null) return;
-  //
-  //     final imageTemporary = File(image.path);
-  //     setState(() {
-  //       this.image = imageTemporary;
-  //     });
-  //   } on PlatformException catch (e) {
-  //     setState(() {
-  //       this.error = 'Failed to pick image: $e';
-  //     });
-  //   }
-  // }
-
   Future pickImage(CreateItemCubit formBloc) async {
     try {
       final image = await ImagePicker().pickImage(source: ImageSource.gallery);
