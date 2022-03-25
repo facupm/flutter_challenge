@@ -39,7 +39,7 @@ class ItemsListScreen extends StatelessWidget {
                 if (state is LoadedItemsState) {
                   return buildItemsList(listBloc);
                 }
-                return Container();
+                return buildItemsList(listBloc);
               },
             ));
       }),
@@ -47,36 +47,16 @@ class ItemsListScreen extends StatelessWidget {
   }
 
   Widget buildItemsList(ItemsListCubit listBloc) {
-    List<List<ItemWithColorModel>> organizedItems = organizeItems(listBloc.state.items);
+    List<List<ItemWithColorModel>> organizedItems = listBloc.state.items;
 
     return ListView.builder(
         itemCount: organizedItems.length,
         itemBuilder: (context, index) =>
-            buildItemsByCategory(organizedItems[index], listBloc)
+            buildItemsByCategory(organizedItems[index], index, listBloc)
     );
   }
 
-  List<List<ItemWithColorModel>> organizeItems(List<ItemWithColorModel> items) {
-    if (items.isEmpty) {
-      return [];
-    }
-    List<List<ItemWithColorModel>> list = [];
-    List<ItemWithColorModel> insideList = [];
-    var category = items[0].category;
-    for (var item in items) {
-      if (item.category != category) {
-        list.add(insideList);
-        insideList = <ItemWithColorModel>[];
-        category = item.category;
-      }
-      // print(item.name);
-      insideList.add(item);
-    }
-    list.add(insideList);
-    return list;
-  }
-
-  Widget buildItemsByCategory(List<ItemWithColorModel> organizedItem, ItemsListCubit listBloc) {
+  Widget buildItemsByCategory(List<ItemWithColorModel> organizedItem, int categoryListIndex, ItemsListCubit listBloc) {
     var categoryName = organizedItem[0].category;
     // var categoryColor = await listBloc.getCategoryColor(categoryName);
     return BlocBuilder(
@@ -84,19 +64,38 @@ class ItemsListScreen extends StatelessWidget {
       builder: (context, state) => ExpansionTile(
         title: Text(categoryName),
         // subtitle: Text('Trailing expansion arrow icon'),
-        children: buildItemCards(organizedItem),
-        backgroundColor: organizedItem[0].color,
+        children: <Widget>[buildItemCards(organizedItem, categoryListIndex, listBloc)],
+        // backgroundColor: organizedItem[0].color,
         collapsedBackgroundColor: organizedItem[0].color,
+        initiallyExpanded: true,
       ),
     );
   }
 
-  List<Widget> buildItemCards(List<ItemWithColorModel> organizedItem) {
-    List<Widget> cardsList = [];
-    for(var item in organizedItem){
-      cardsList.add(buildItemCard(item));
-    }
-    return cardsList;
+  Widget buildItemCards(List<ItemWithColorModel> _items, int categoryListIndex, ItemsListCubit listBloc){
+    return BlocBuilder(
+      bloc: listBloc,
+      builder: (context, state) => ReorderableListView(
+        // scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        // padding: const EdgeInsets.symmetric(horizontal: 40),
+        children: <Widget>[
+          for (int index = 0; index < _items.length; index++)
+            ListTile(
+              key: Key('item$index'),
+              title: Text(_items[index].name),
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(_items[index].imageUrl),
+              ),
+              trailing: const Icon(Icons.drag_handle),
+            ),
+        ],
+        onReorder: (int oldIndex, int newIndex) {
+          listBloc.rearrange(categoryListIndex, oldIndex, newIndex);
+        },
+      ),
+    );
   }
 
   buildItemCard(ItemWithColorModel organizedItem) {

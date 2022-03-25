@@ -1,7 +1,7 @@
 part of '../cubits/items_list_cubit.dart';
 
 abstract class ItemsListState {
-  late List<ItemWithColorModel> items;
+  late List<List<ItemWithColorModel>> items;
 }
 
 class InitialState extends ItemsListState {
@@ -11,19 +11,25 @@ class InitialState extends ItemsListState {
 }
 
 class LoadingItemsState extends ItemsListState {
-  LoadingItemsState(List<ItemWithColorModel> items) {
+  LoadingItemsState(List<List<ItemWithColorModel>> items) {
     this.items = items;
   }
 }
 
 class LoadedItemsState extends ItemsListState {
-  LoadedItemsState(List<ItemWithColorModel> items) {
+  LoadedItemsState(List<List<ItemWithColorModel>> items) {
     this.items = items;
   }
 }
 
 class LoadedColors extends ItemsListState {
-  LoadedColors(List<ItemWithColorModel> items) {
+  LoadedColors(List<List<ItemWithColorModel>> items) {
+    this.items = items;
+  }
+}
+
+class ItemsRearrangedState extends ItemsListState {
+  ItemsRearrangedState(List<List<ItemWithColorModel>> items) {
     this.items = items;
   }
 }
@@ -31,7 +37,7 @@ class LoadedColors extends ItemsListState {
 class ErrorState extends ItemsListState {
   final String error;
 
-  ErrorState(List<ItemWithColorModel> items, this.error) {
+  ErrorState(List<List<ItemWithColorModel>> items, this.error) {
     this.items = items;
   }
 }
