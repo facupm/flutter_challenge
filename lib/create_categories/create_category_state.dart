@@ -19,6 +19,6 @@ class ColorChange extends CreateCategoryState {
 
   @override
   // TODO: implement props
-  List<Object?> get props => throw UnimplementedError();
+  List<Object?> get props => [color];
 
 }

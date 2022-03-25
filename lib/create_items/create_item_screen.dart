@@ -32,7 +32,8 @@ class _CreateItemScreen extends State<CreateItemScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => CreateItemCubit(CreateItemRepository()),
+      create: (context) =>
+          CreateItemCubit(CreateItemRepository())..getCategories(),
       child: Builder(builder: (context) {
         args =
             ModalRoute.of(context)!.settings.arguments as Map<String, String>?;
@@ -58,22 +59,31 @@ class _CreateItemScreen extends State<CreateItemScreen> {
                 },
                 onFailure: (context, state) {
                   LoadingDialog.hide(context);
-                  if(state.failureResponse is ItemAlreadyExistsException){
-                    formBloc.name.addFieldError("An item with this name already exists");
-                  }
-                  else if(state.failureResponse is EmptyImageException){
+                  if (state.failureResponse is ItemAlreadyExistsException) {
+                    formBloc.name
+                        .addFieldError("An item with this name already exists");
+                  } else if (state.failureResponse is EmptyImageException) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text("Item image must not be empty"),
                       duration: Duration(seconds: 2),
                     ));
-                  }else {
+                  } else {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text(
-                          "Something went wrong. Please try again: ${state
-                              .failureResponse!.toString()}"),
+                          "Something went wrong. Please try again: ${state.failureResponse!.toString()}"),
                       duration: Duration(seconds: 2),
                     ));
                   }
+                },
+                onLoading: (context, state){
+                  setState(() {
+                    isLoading = true;
+                  });
+                },
+                onLoaded: (context, state){
+                  setState(() {
+                    isLoading = false;
+                  });
                 },
                 child: SingleChildScrollView(
                   // physics: const ClampingScrollPhysics(),
@@ -113,14 +123,33 @@ class _CreateItemScreen extends State<CreateItemScreen> {
                         // icon: Icon(Icons.email)
                       ),
                       FormFieldTag(name: "Category"),
-                      CustomTextField(
-                        key: Key("categoryField"),
-                        bloc: formBloc.category,
-                        isEnabled: !isLoading,
-                        keyboard: TextInputType.name,
-                        label: "Enter a category",
-                        hint: 'Enter an item category',
-                        // icon: Icon(Icons.email)
+                      // CustomTextField(
+                      //   key: Key("categoryField"),
+                      //   bloc: formBloc.category,
+                      //   isEnabled: !isLoading,
+                      //   keyboard: TextInputType.name,
+                      //   label: "Enter a category",
+                      //   hint: 'Enter an item category',
+                      //   // icon: Icon(Icons.email)
+                      // ),
+                      BlocBuilder(
+                        bloc: formBloc,
+                        builder: (context, state) => DropdownFieldBlocBuilder<String>(
+                          selectFieldBloc: formBloc.category,
+                          decoration: InputDecoration(
+                              labelText: "Select a category",
+                              errorMaxLines: 2,
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 16, horizontal: 16),
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey[400]!),
+                                borderRadius: BorderRadius.circular(15),
+                              )),
+                          itemBuilder: (context, value) => FieldItem(
+                            isEnabled: !isLoading,
+                            child: Text(value),
+                          ),
+                        ),
                       ),
                       !this.isLoading
                           ? SizedBox(

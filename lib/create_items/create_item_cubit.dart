@@ -10,6 +10,11 @@ import 'exceptions/empty_image.dart';
 
 class CreateItemCubit extends FormBloc<String, Exception> {
 
+
+  File? image;
+
+  final CreateItemRepository _createItemRepository;
+
   final name = TextFieldBloc(
     name: "name",
     validators: [
@@ -17,44 +22,28 @@ class CreateItemCubit extends FormBloc<String, Exception> {
     ],
   );
 
-  final category = TextFieldBloc(
-    name: "category",
-    validators: [
-      FieldValidators.required,
-    ],
+  final category = SelectFieldBloc(
+    items: [""],
+    validators: [FieldBlocValidators.required],
   );
 
-  // final imageUrl = TextFieldBloc(
-  //   name: "imageUrl",
-  //   validators: [
-  //     // FieldValidators.required,
-  //   ],
-  // );
-
-  File? image;
-
-  final CreateItemRepository _createItemRepository;
   CreateItemCubit(this._createItemRepository) {
     addFieldBlocs(fieldBlocs: [name, category]);
   }
 
-  void createItem(ItemModel item) async {
-    // try {
-    //   emit(CreatingState());
-    //   await repository.createItem(item);
-    //   emit(CreatedState(item));
-    // } catch (e) {
-    //   emit(ErrorState());
-    // }
+  Future<void> getCategories() async {
+    emitLoading();
+    category.updateItems(await _createItemRepository.getCategories());
+    emitLoaded();
   }
 
   @override
   FutureOr<void> onSubmitting() async {
     try {
       if(image==null){
-        throw Exception("la imagen no puede");
+        throw EmptyImageException();
       }
-      await _createItemRepository.createItem(name.value, category.value, image);
+      await _createItemRepository.createItem(name.value, category.value!, image);
       name.clear();
       category.clear();
       image = null;

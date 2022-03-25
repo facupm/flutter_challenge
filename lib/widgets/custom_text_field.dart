@@ -56,7 +56,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 )
               : null,
           contentPadding: EdgeInsets.symmetric(
-              vertical: 16, horizontal: _hasIcon ? 16 : 30),
+              vertical: 16, horizontal: !_hasIcon ? 16 : 30),
           border: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.grey[400]!),
             borderRadius: BorderRadius.circular(15),

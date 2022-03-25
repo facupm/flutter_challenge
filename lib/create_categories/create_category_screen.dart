@@ -62,7 +62,7 @@ class _CreateCategoryScreen extends State<CreateCategoryScreen> {
                   LoadingDialog.hide(context);
                   if (state.failureResponse is CategoryAlreadyExistsException) {
                     formBloc.name
-                        .addFieldError("An item with this name already exists");
+                        .addFieldError("A category with this name already exists");
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text(
