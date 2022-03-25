@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_challege/items_list/models/item_with_category_color_model.dart';
 import 'package:flutter_challege/widgets/menu_drawer.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../utils/show_custom_snackbar.dart';
 import '../cubits/items_list_cubit.dart';
@@ -11,7 +12,8 @@ import '../repositories/items_list_repository.dart';
 class ItemsListScreen extends StatelessWidget {
   final String title = 'Create Item';
 
-  const ItemsListScreen({Key? key}) : super(key: key);
+  // const ItemsListScreen({Key? key}) : super(key: key);
+  final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +26,7 @@ class ItemsListScreen extends StatelessWidget {
             appBar: AppBar(title: Text(title)),
             drawer: const MenuDrawer(),
             body: BlocBuilder(
+              key: _formkey,
               bloc: listBloc,
               builder: (context, state) {
                 if (state is LoadingItemsState) {
@@ -52,43 +55,75 @@ class ItemsListScreen extends StatelessWidget {
     return ListView.builder(
         itemCount: organizedItems.length,
         itemBuilder: (context, index) =>
-            buildItemsByCategory(organizedItems[index], index, listBloc)
-    );
+            buildItemsByCategory(organizedItems[index], index, listBloc));
   }
 
-  Widget buildItemsByCategory(List<ItemWithColorModel> organizedItem, int categoryListIndex, ItemsListCubit listBloc) {
+  Widget buildItemsByCategory(List<ItemWithColorModel> organizedItem,
+      int categoryListIndex, ItemsListCubit listBloc) {
     var categoryName = organizedItem[0].category;
     // var categoryColor = await listBloc.getCategoryColor(categoryName);
     return BlocBuilder(
       bloc: listBloc,
-      builder: (context, state) => ExpansionTile(
-        title: Text(categoryName),
-        // subtitle: Text('Trailing expansion arrow icon'),
-        children: <Widget>[buildItemCards(organizedItem, categoryListIndex, listBloc)],
-        // backgroundColor: organizedItem[0].color,
-        collapsedBackgroundColor: organizedItem[0].color,
-        initiallyExpanded: true,
+      builder: (context, state) => Slidable(
+        endActionPane: ActionPane(
+          motion: const ScrollMotion(),
+          children: [
+            SlidableAction(
+              onPressed: (context) => deleteCategory(),
+              backgroundColor: const Color(0xFFFE4A49),
+              foregroundColor: Colors.white,
+              icon: Icons.delete,
+              label: 'Delete',
+            ),
+          ],
+        ),
+        child: ExpansionTile(
+          title: Text(categoryName),
+          // subtitle: Text('Trailing expansion arrow icon'),
+          children: <Widget>[
+            buildItemCards(organizedItem, categoryListIndex, listBloc)
+          ],
+          // backgroundColor: organizedItem[0].color,
+          collapsedBackgroundColor: organizedItem[0].color,
+          initiallyExpanded: true,
+        ),
       ),
     );
   }
 
-  Widget buildItemCards(List<ItemWithColorModel> _items, int categoryListIndex, ItemsListCubit listBloc){
+  Widget buildItemCards(List<ItemWithColorModel> _items, int categoryListIndex,
+      ItemsListCubit listBloc) {
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => ReorderableListView(
         // scrollDirection: Axis.vertical,
         shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
+        // physics: const NeverScrollableScrollPhysics(),
         // padding: const EdgeInsets.symmetric(horizontal: 40),
         children: <Widget>[
           for (int index = 0; index < _items.length; index++)
-            ListTile(
-              key: Key('item$index'),
-              title: Text(_items[index].name),
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(_items[index].imageUrl),
+            Slidable(
+              key: Key('$index'),
+              endActionPane: ActionPane(
+                motion: const ScrollMotion(),
+                children: [
+                  SlidableAction(
+                    onPressed: (context) => deleteItem(),
+                    backgroundColor: const Color(0xFFFE4A49),
+                    foregroundColor: Colors.white,
+                    icon: Icons.delete,
+                    label: 'Delete',
+                  ),
+                ],
               ),
-              trailing: const Icon(Icons.drag_handle),
+              child: ListTile(
+                key: Key('item$index'),
+                title: Text(_items[index].name),
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(_items[index].imageUrl),
+                ),
+                trailing: const Icon(Icons.drag_handle),
+              ),
             ),
         ],
         onReorder: (int oldIndex, int newIndex) {
@@ -98,17 +133,87 @@ class ItemsListScreen extends StatelessWidget {
     );
   }
 
-  buildItemCard(ItemWithColorModel organizedItem) {
-    return Card(
-      child: ListTile(
-        title: Text(organizedItem.name),
-        leading: CircleAvatar(
-          backgroundImage: NetworkImage(organizedItem.imageUrl),
-        ),
-      ),
-    );
+  void deleteItem() {
+    showDialog(
+        context: _formkey.currentContext!,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: const Text('Delete Item'),
+            content: const Text('Are you sure to delete this item?'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(_formkey.currentContext!).pop();
+                  },
+                  child: const Text('Yes')),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(_formkey.currentContext!).pop();
+                  },
+                  child: const Text('No'))
+            ],
+          );
+        });
   }
+
+  void deleteCategory() {
+    showDialog(
+        context: _formkey.currentContext!,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: const Text('Delete Category'),
+            content: SizedBox(
+              height: 40,
+              child: Column(
+                children: const [
+                  Text('Are you sure to delete this category?'),
+                  SizedBox(height: 5),
+                  Text(
+                    '(Every item on this category will be also deleted)',
+                    style: TextStyle(color: Colors.black54, fontSize: 12),
+                    textAlign: TextAlign.left,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(_formkey.currentContext!).pop();
+                  },
+                  child: const Text('Yes')),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(_formkey.currentContext!).pop();
+                  },
+                  child: const Text('No'))
+            ],
+          );
+        });
+  }
+
+// buildItemCard(ItemWithColorModel organizedItem) {
+//   return Slidable(
+//     endActionPane: ActionPane(
+//       motion: const ScrollMotion(),
+//       children: [
+//         SlidableAction(
+//           onPressed: (context) => doNothing(),
+//           backgroundColor: const Color(0xFFFE4A49),
+//           foregroundColor: Colors.white,
+//           icon: Icons.delete,
+//           label: 'Delete',
+//         ),
+//       ],
+//     ),
+//     child: Card(
+//       child: ListTile(
+//         title: Text(organizedItem.name),
+//         leading: CircleAvatar(
+//           backgroundImage: NetworkImage(organizedItem.imageUrl),
+//         ),
+//       ),
+//     ),
+//   );
+// }
 }
-
-
-
