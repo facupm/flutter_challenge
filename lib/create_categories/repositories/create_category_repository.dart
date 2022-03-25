@@ -8,7 +8,7 @@ class CreateCategoryRepository {
   final CollectionReference itemsCollection =
   FirebaseFirestore.instance.collection('categories');
 
-  Future<void> createCategory(String name, String color) async {
+  Future<void> createCategory(String name, int color) async {
     try {
       var item = await itemsCollection.doc(name).get();
       if(item.exists){

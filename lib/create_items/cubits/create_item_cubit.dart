@@ -85,7 +85,7 @@ class CreateItemCubit extends Cubit<CreateItemState> {
       state.selectedCategory = "";
       // category.clear();
       state.image = null;
-      emit(CreatedSuccessfullyState());
+      emit(CreatedSuccessfullyState(state.categories));
     } on Exception catch (e) {
       emit(ErrorState(state.image, state.name, state.categories,
           state.selectedCategory, e.toString()));

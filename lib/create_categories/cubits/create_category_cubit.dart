@@ -30,7 +30,7 @@ class CreateCategoryCubit extends Cubit<CreateCategoryState> {
       }
 
       await _createCategoryRepository.createCategory(
-          state.name, state.color.toString());
+          state.name, state.color.value);
       emit(CreatedSuccessfullyState());
     } on Exception catch (e) {
       emit(ErrorState(state.name, state.color, e.toString()));
