@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_challege/create_items/screens/create_item_screen.dart';
 
 import '../create_categories/screens/create_category_screen.dart';
+import '../items_list/screens/items_list_screen.dart';
 
 class MenuDrawer extends StatelessWidget {
   // static void show(BuildContext context, {Key? key}) => showDialog<void>(
@@ -36,6 +37,15 @@ class MenuDrawer extends StatelessWidget {
                         fontSize: 20.0,
                         fontWeight: FontWeight.w500))),
           ])),
+          ListTile(
+            title: const Text('Shopping List'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ItemsListScreen()),
+              );
+            },
+          ),
           ListTile(
             title: const Text('Create item'),
             onTap: () {

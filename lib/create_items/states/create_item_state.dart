@@ -33,10 +33,10 @@ class CreatingState extends CreateItemState {
 }
 
 class CreatedSuccessfullyState extends CreateItemState {
-  CreatedSuccessfullyState() {
+  CreatedSuccessfullyState(List<String> categories) {
     image = null;
     name = "";
-    categories = [];
+    this.categories = categories;
     selectedCategory = "";
   }
 }
