@@ -12,7 +12,6 @@ class CreateItemCubit extends Cubit<CreateItemState> {
   // File? image;
 
   late final CreateItemRepository _createItemRepository;
-  late final FieldValidators validators;
 
   CreateItemCubit(this._createItemRepository) : super(InitialState());
 

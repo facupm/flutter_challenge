@@ -1,44 +1,49 @@
-// import 'dart:async';
-// import 'dart:io';
-// import 'dart:ui';
-//
-// import 'package:flutter/material.dart';
-// import 'package:flutter_challege/utils/form_validators.dart';
-// import 'package:flutter_form_bloc/flutter_form_bloc.dart';
-//
-// import 'create_category_repository.dart';
-// import 'create_category_state.dart';
-//
-// class CreateCategoryCubit extends FormBloc<String, Exception> {
-//
-//   final name = TextFieldBloc(
-//     name: "name",
-//     validators: [
-//       FieldValidators.required,
-//     ],
-//   );
-//
-//   Color color = Colors.redAccent;
-//
-//   void changeColor(Color newColor){
-//     color = newColor;
-//     emitUpdatingFields();
-//   }
-//
-//   final CreateCategoryRepository _createCategoryRepository;
-//   CreateCategoryCubit(this._createCategoryRepository) {
-//     addFieldBloc(fieldBloc: name);
-//   }
-//
-//   @override
-//   FutureOr<void> onSubmitting() async {
-//     try {
-//       await _createCategoryRepository.createCategory(name.value, color.toString());
-//       name.clear();
-//       color = Colors.redAccent;
-//       emitSuccess();
-//     } on Exception catch (e) {
-//       emitFailure(failureResponse: e);
-//     }
-//   }
-// }
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../utils/form_validators.dart';
+import '../repositories/create_category_repository.dart';
+
+part '../states/create_category_state.dart';
+
+class CreateCategoryCubit extends Cubit<CreateCategoryState> {
+  final CreateCategoryRepository _createCategoryRepository;
+
+  CreateCategoryCubit(this._createCategoryRepository) : super(InitialState());
+
+  void changeColor(Color newColor) {
+    state.color = newColor;
+    emit(ColorChangeState(state.name, newColor));
+  }
+
+  FutureOr<void> submit() async {
+    try {
+      emit(CreatingState(state.name, state.color));
+
+
+      if(FieldValidators.required(state.name) != null){
+        emit(ErrorState(state.name, state.color, "You must enter a name"));
+      }
+      if(FieldValidators.required(state.color) != null){
+        emit(ErrorState(state.name, state.color, "You must select a color"));
+      }
+
+      await _createCategoryRepository.createCategory(
+          state.name, state.color.toString());
+      emit(CreatedSuccessfullyState());
+    } on Exception catch (e) {
+      emit(ErrorState(state.name, state.color, e.toString()));
+    }
+  }
+
+  void changeName(String? value) {
+    var message = FieldValidators.required(value);
+    if (message != null) {
+      emit(NameErrorState(state.name, state.color, message));
+      return;
+    }
+    state.name = value!;
+    emit(SuccessState(state.name, state.color));
+  }
+}
