@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-import 'create_items/create_item_screen.dart';
+import 'create_items/screens/create_item_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_challege/create_items/create_item_screen.dart';
+import 'package:flutter_challege/create_items/screens/create_item_screen.dart';
 
-import '../create_categories/create_category_screen.dart';
+import '../create_categories/screens/create_category_screen.dart';
 
 class MenuDrawer extends StatelessWidget {
   // static void show(BuildContext context, {Key? key}) => showDialog<void>(

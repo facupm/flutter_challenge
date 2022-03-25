@@ -6,10 +6,10 @@ import 'package:flutter_challege/widgets/loading_dialog.dart';
 import 'package:flutter_challege/widgets/menu_drawer.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../widgets/custom_text_field.dart';
-import '../widgets/form_field_tag.dart';
-import 'create_item_cubit.dart';
-import 'create_item_repository.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/form_field_tag.dart';
+import '../cubits/create_item_cubit.dart';
+import '../repositories/create_item_repository.dart';
 
 class CreateItemScreen extends StatefulWidget {
   final String title = 'Create Item';

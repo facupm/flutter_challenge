@@ -1,4 +1,4 @@
-part of 'create_item_cubit.dart';
+part of '../cubits/create_item_cubit.dart';
 
 abstract class CreateItemState {
   File? image;

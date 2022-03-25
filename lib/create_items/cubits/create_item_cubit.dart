@@ -1,16 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_challege/utils/form_validators.dart';
 
-import 'create_item_repository.dart';
-import 'exceptions/empty_image.dart';
+import '../repositories/create_item_repository.dart';
 
-import 'item_model.dart';
-
-part 'create_item_state.dart';
+part '../states/create_item_state.dart';
 
 class CreateItemCubit extends Cubit<CreateItemState> {
   // File? image;

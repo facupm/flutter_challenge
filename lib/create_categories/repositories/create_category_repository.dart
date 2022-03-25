@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'exceptions/category_already_exists.dart';
+import '../exceptions/category_already_exists.dart';
 
 class CreateCategoryRepository {
   final CollectionReference itemsCollection =
