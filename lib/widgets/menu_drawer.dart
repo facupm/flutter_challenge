@@ -48,10 +48,10 @@ class MenuDrawer extends StatelessWidget {
           ListTile(
             title: const Text('Create category'),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CreateCategoryScreen()),
-              );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => CreateCategoryScreen()),
+              // );
             },
           ),
         ],

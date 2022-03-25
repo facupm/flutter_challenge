@@ -17,7 +17,7 @@ class CreateItemRepository {
 
   Future<List<String>> getCategories() async{
     List<String> categoriesNames = [];
-    categoriesCollection
+    await categoriesCollection
         .get()
         .then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {

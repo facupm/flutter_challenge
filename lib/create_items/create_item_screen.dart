@@ -1,18 +1,15 @@
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_challege/create_items/create_item_cubit.dart';
-import 'package:flutter_challege/create_items/exceptions/item_already_exists.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_challege/widgets/loading_dialog.dart';
 import 'package:flutter_challege/widgets/menu_drawer.dart';
-import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../widgets/custom_text_field.dart';
 import '../widgets/form_field_tag.dart';
+import 'create_item_cubit.dart';
 import 'create_item_repository.dart';
-import 'exceptions/empty_image.dart';
 
 class CreateItemScreen extends StatefulWidget {
   final String title = 'Create Item';
@@ -25,13 +22,13 @@ class _CreateItemScreen extends State<CreateItemScreen> {
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
   // String? error;
-  File? image;
-  bool isLoading = false;
+  // File? image;
+  // bool isLoading = false;
   Map<String, String>? args;
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<CreateItemCubit>(
       create: (context) =>
           CreateItemCubit(CreateItemRepository())..getCategories(),
       child: Builder(builder: (context) {
@@ -45,45 +42,28 @@ class _CreateItemScreen extends State<CreateItemScreen> {
               title: Text(widget.title),
             ),
             drawer: const MenuDrawer(),
-            body: FormBlocListener<CreateItemCubit, String, Exception>(
+            body: BlocListener<CreateItemCubit, CreateItemState>(
                 key: _formkey,
-                onSubmitting: (context, state) {
-                  LoadingDialog.show(context);
-                },
-                onSuccess: (context, state) {
-                  LoadingDialog.hide(context);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Item created successfully"),
-                    duration: Duration(seconds: 2),
-                  ));
-                },
-                onFailure: (context, state) {
-                  LoadingDialog.hide(context);
-                  if (state.failureResponse is ItemAlreadyExistsException) {
-                    formBloc.name
-                        .addFieldError("An item with this name already exists");
-                  } else if (state.failureResponse is EmptyImageException) {
+                listener: (context, state) {
+                  if (state is CreatedSuccessfullyState) {
+                    LoadingDialog.hide(context);
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Item image must not be empty"),
-                      duration: Duration(seconds: 2),
-                    ));
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(
-                          "Something went wrong. Please try again: ${state.failureResponse!.toString()}"),
+                      content: Text("Item created successfully"),
                       duration: Duration(seconds: 2),
                     ));
                   }
-                },
-                onLoading: (context, state){
-                  setState(() {
-                    isLoading = true;
-                  });
-                },
-                onLoaded: (context, state){
-                  setState(() {
-                    isLoading = false;
-                  });
+                  if (state is CreatingState) {
+                    LoadingDialog.show(context);
+                  }
+                  if (state is ErrorState) {
+                    LoadingDialog.hide(context);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                          "Something went wrong. Please try again: ${state.error}"),
+                      duration: Duration(seconds: 2),
+                    ));
+                    // }
+                  }
                 },
                 child: SingleChildScrollView(
                   // physics: const ClampingScrollPhysics(),
@@ -95,11 +75,11 @@ class _CreateItemScreen extends State<CreateItemScreen> {
                           onTap: () async {
                             await pickImage(formBloc);
                           },
-                          child: BlocBuilder(
+                          child: BlocBuilder<CreateItemCubit, CreateItemState>(
                             bloc: formBloc,
                             builder: (context, state) => ClipRRect(
-                              child: formBloc.image != null
-                                  ? Image.file(formBloc.image!,
+                              child: formBloc.state.image != null
+                                  ? Image.file(formBloc.state.image!,
                                       width: 136.0,
                                       height: 136.0,
                                       fit: BoxFit.cover)
@@ -113,64 +93,67 @@ class _CreateItemScreen extends State<CreateItemScreen> {
                           )),
                       SizedBox(height: 10),
                       FormFieldTag(name: "Name"),
-                      CustomTextField(
-                        key: Key("nameField"),
-                        bloc: formBloc.name,
-                        isEnabled: !isLoading,
-                        keyboard: TextInputType.name,
-                        label: "Enter a name",
-                        hint: 'Enter an item name',
-                        // icon: Icon(Icons.email)
-                      ),
-                      FormFieldTag(name: "Category"),
-                      // CustomTextField(
-                      //   key: Key("categoryField"),
-                      //   bloc: formBloc.category,
-                      //   isEnabled: !isLoading,
-                      //   keyboard: TextInputType.name,
-                      //   label: "Enter a category",
-                      //   hint: 'Enter an item category',
-                      //   // icon: Icon(Icons.email)
-                      // ),
                       BlocBuilder(
                         bloc: formBloc,
-                        builder: (context, state) => DropdownFieldBlocBuilder<String>(
-                          selectFieldBloc: formBloc.category,
+                        builder: (context, state) => CustomTextField(
+                          key: Key("nameField"),
+                          // bloc: formBloc.name,
+                          // isEnabled: !isLoading,
+                          keyboard: TextInputType.name,
+                          label: "Enter a name",
+                          hint: 'Enter an item name',
+                          onChange: (value) => {formBloc.changeName(value)},
+                          error: state is NameErrorState ? state.error : null,
+                          // icon: Icon(Icons.email)
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      FormFieldTag(name: "Category"),
+                      BlocBuilder(
+                        bloc: formBloc,
+                        builder: (context, state) =>
+                            DropdownButtonFormField<String>(
+                              // value: state is CategoryLoaded ? state.selectedCategory : formBloc.state.selectedCategory,
+                              // value: "b",
                           decoration: InputDecoration(
+                              errorText: state is CategoryErrorState
+                                  ? state.error
+                                  : null,
                               labelText: "Select a category",
                               errorMaxLines: 2,
                               contentPadding: const EdgeInsets.symmetric(
                                   vertical: 16, horizontal: 16),
                               border: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.grey[400]!),
+                                borderSide:
+                                    BorderSide(color: Colors.grey[400]!),
                                 borderRadius: BorderRadius.circular(15),
                               )),
-                          itemBuilder: (context, value) => FieldItem(
-                            isEnabled: !isLoading,
-                            child: Text(value),
-                          ),
+                          // items: getMenuItems(["a", "b"]),
+                          items: state is CategoriesLoaded ? getMenuItems(state.categories) : getMenuItems(formBloc.state.categories),
+                          onChanged: (String? value) {
+                            formBloc.changeCategory(value);
+                          },
                         ),
                       ),
-                      !this.isLoading
-                          ? SizedBox(
-                              width: size.width * 0.8,
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  formBloc.submit();
-                                },
-                                child: Text("Create"),
-                                style: ButtonStyle(
-                                    foregroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            Colors.white),
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            Colors.black87),
-                                    side: MaterialStateProperty.all<BorderSide>(
-                                        BorderSide.none)),
-                              ),
-                            )
-                          : CircularProgressIndicator(),
+                      SizedBox(height: 20),
+                      // !isLoading ?
+                      SizedBox(
+                        width: size.width * 0.8,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            formBloc.submit();
+                          },
+                          child: Text("Create"),
+                          style: ButtonStyle(
+                              foregroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.white),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.black87),
+                              side: MaterialStateProperty.all<BorderSide>(
+                                  BorderSide.none)),
+                        ),
+                      )
+                      // : CircularProgressIndicator(),
                     ],
                   ),
                 )));
@@ -184,16 +167,22 @@ class _CreateItemScreen extends State<CreateItemScreen> {
       if (image == null) return;
 
       final imageTemporary = File(image.path);
-      formBloc.image = imageTemporary;
-
-      setState(() {
-        this.image = imageTemporary;
-      });
+      formBloc.changeImage(imageTemporary);
     } on PlatformException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Failed to pick image: $e"),
         duration: Duration(seconds: 2),
       ));
     }
+  }
+
+  List<DropdownMenuItem<String>> getMenuItems(List<String> categories) {
+    List<DropdownMenuItem<String>> list = [];
+    int cont = 0;
+    for (var category in categories) {
+      cont++;
+      list.add(DropdownMenuItem(child: Text(category), value: category));
+    }
+    return list.toList();
   }
 }
