@@ -1,6 +1,4 @@
 
-import 'package:flutter_form_bloc/flutter_form_bloc.dart';
-
 class ValidationErrors {
   ValidationErrors._();
 
