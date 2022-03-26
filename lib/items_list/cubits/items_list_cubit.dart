@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../models/item_with_category_color_model.dart';
+import '../models/complete_item_model.dart';
 import '../repositories/items_list_repository.dart';
 
 part '../states/items_list_state.dart';
@@ -24,17 +24,17 @@ class ItemsListCubit extends Cubit<ItemsListState> {
     }
   }
 
-  List<List<ItemWithColorModel>> organizeItems(List<ItemWithColorModel> items) {
+  List<List<CompleteItemModel>> organizeItems(List<CompleteItemModel> items) {
     if (items.isEmpty) {
       return [];
     }
-    List<List<ItemWithColorModel>> list = [];
-    List<ItemWithColorModel> insideList = [];
+    List<List<CompleteItemModel>> list = [];
+    List<CompleteItemModel> insideList = [];
     var category = items[0].category;
     for (var item in items) {
       if (item.category != category) {
         list.add(insideList);
-        insideList = <ItemWithColorModel>[];
+        insideList = <CompleteItemModel>[];
         category = item.category;
       }
       insideList.add(item);
@@ -47,18 +47,18 @@ class ItemsListCubit extends Cubit<ItemsListState> {
     if (oldIndex < newIndex) {
       newIndex -= 1;
     }
-    ItemWithColorModel item = state.items[categoryListIndex].removeAt(oldIndex);
+    CompleteItemModel item = state.items[categoryListIndex].removeAt(oldIndex);
     state.items[categoryListIndex].insert(newIndex, item);
     emit(ItemsRearrangedState(state.items));
   }
 
-  Future<void> deleteItem(ItemWithColorModel item) async {
+  Future<void> deleteItem(CompleteItemModel item) async {
     var categoryIndex = 0;
     var itemIndex = 0;
-    for(var list in state.items){
-      if(list[0].category == item.category){
-        for(var itemInList in list){
-          if(itemInList.name == item.name){
+    for (var list in state.items) {
+      if (list[0].category == item.category) {
+        for (var itemInList in list) {
+          if (itemInList.name == item.name) {
             break;
           }
           itemIndex++;
@@ -78,8 +78,8 @@ class ItemsListCubit extends Cubit<ItemsListState> {
   Future<void> deleteCategory(String categoryName) async {
     var categoryItems = [];
     var index = 0;
-    for(var list in state.items){
-      if(list[0].category == categoryName){
+    for (var list in state.items) {
+      if (list[0].category == categoryName) {
         categoryItems = list;
         break;
       }
@@ -94,31 +94,50 @@ class ItemsListCubit extends Cubit<ItemsListState> {
   }
 
   search(String value) {
-    if(value != ""){
-      List<List<ItemWithColorModel>> categoriesList = [];
-      for(var list in state.items){
-        if(list[0].category == value) {
+    if (value != "") {
+      List<List<CompleteItemModel>> categoriesList = [];
+      for (var list in state.items) {
+        if (list[0].category == value) {
           categoriesList.add(list);
           continue;
-        }else{
-          List<ItemWithColorModel> itemList = [];
-          for(var itemInList in list){
-            if(itemInList.name == value){
+        } else {
+          List<CompleteItemModel> itemList = [];
+          for (var itemInList in list) {
+            if (itemInList.name == value) {
               itemList.add(itemInList);
               break;
             }
           }
-          if(itemList.isNotEmpty){
+          if (itemList.isNotEmpty) {
             categoriesList.add(itemList);
           }
         }
       }
-    state.searchedList = categoriesList;
+      state.searchedList = categoriesList;
     }
     emit(SearchedState(state.items, state.searchedList));
   }
 
   void closeSearch() {
     emit(LoadedItemsState(state.items));
+  }
+
+  Future<void> addToFavorite(CompleteItemModel item, int index) async {
+    if (item.isFavorite) {
+      emit(AlreadyFavoriteErrorState(state.items));
+    } else {
+      try {
+        await _itemsListRepository.addToFavorite(item.name);
+        for(var categories in state.items){
+          if(categories[0].category == item.category){
+            categories[index].isFavorite = true;
+            break;
+          }
+        }
+        emit(AddedToFavorites(state.items));
+      } catch (e) {
+        emit(ErrorState(state.items, e.toString()));
+      }
+    }
   }
 }

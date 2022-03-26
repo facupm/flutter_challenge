@@ -1,15 +1,16 @@
 import 'dart:ui';
 
-class ItemWithColorModel {
-  ItemWithColorModel({
+class CompleteItemModel {
+  CompleteItemModel({
     required this.name,
     required this.category,
     required this.imageUrl,
-    // this.color,
+    required this.isFavorite,
   });
 
   final String name;
   final String category;
   final String imageUrl;
   late final Color? color;
+  late bool isFavorite;
 }

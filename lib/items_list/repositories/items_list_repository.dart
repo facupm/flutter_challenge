@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:flutter_challege/items_list/models/item_with_category_color_model.dart';
+import 'package:flutter_challege/items_list/models/complete_item_model.dart';
 
 class ItemsListRepository {
   final CollectionReference itemsCollection =
@@ -14,17 +14,19 @@ class ItemsListRepository {
   firebase_storage.FirebaseStorage firebaseStorage =
       firebase_storage.FirebaseStorage.instance;
 
-  Future<List<ItemWithColorModel>> getItems() async {
-    List<ItemWithColorModel> items = [];
+  Future<List<CompleteItemModel>> getItems() async {
+    List<CompleteItemModel> items = [];
     await itemsCollection
         .orderBy('category', descending: false)
         .get()
         .then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
-        var item = ItemWithColorModel(
-            name: doc["name"],
-            category: doc["category"],
-            imageUrl: doc["imageUrl"]);
+        var item = CompleteItemModel(
+          name: doc["name"],
+          category: doc["category"],
+          imageUrl: doc["imageUrl"],
+          isFavorite: doc["isFavorite"],
+        );
         items.add(item);
       });
     });
@@ -36,7 +38,7 @@ class ItemsListRepository {
     return await itemsCollection.doc(categoryName).get();
   }
 
-  Future<void> setColorOnItem(List<ItemWithColorModel> items) async {
+  Future<void> setColorOnItem(List<CompleteItemModel> items) async {
     if (items.isNotEmpty) {
       String categoryName = items[0].category;
       Color color = await getColorFromCategory(categoryName);
@@ -55,8 +57,7 @@ class ItemsListRepository {
     await categoriesCollection
         .doc(category)
         .get()
-        .then((doc) => color = doc["color"]
-    );
+        .then((doc) => color = doc["color"]);
     return Color(color);
   }
 
@@ -67,5 +68,9 @@ class ItemsListRepository {
 
   Future<void> deleteCategory(String categoryName) async {
     await categoriesCollection.doc(categoryName).delete();
+  }
+
+  Future<void> addToFavorite(String name) async {
+    await itemsCollection.doc(name).update({'isFavorite': true});
   }
 }
