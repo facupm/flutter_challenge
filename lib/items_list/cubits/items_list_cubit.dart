@@ -1,4 +1,3 @@
-
 import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +8,6 @@ import '../repositories/items_list_repository.dart';
 part '../states/items_list_state.dart';
 
 class ItemsListCubit extends Cubit<ItemsListState> {
-
   late final ItemsListRepository _itemsListRepository;
 
   ItemsListCubit(this._itemsListRepository) : super(InitialState());
@@ -21,7 +19,7 @@ class ItemsListCubit extends Cubit<ItemsListState> {
       var orderedList = organizeItems(list);
       state.items = orderedList;
       emit(LoadedItemsState(orderedList));
-    } catch (e){
+    } catch (e) {
       emit(ErrorState(state.items, e.toString()));
     }
   }
@@ -52,5 +50,46 @@ class ItemsListCubit extends Cubit<ItemsListState> {
     ItemWithColorModel item = state.items[categoryListIndex].removeAt(oldIndex);
     state.items[categoryListIndex].insert(newIndex, item);
     emit(ItemsRearrangedState(state.items));
+  }
+
+  Future<void> deleteItem(ItemWithColorModel item) async {
+    var categoryIndex = 0;
+    var itemIndex = 0;
+    for(var list in state.items){
+      if(list[0].category == item.category){
+        for(var itemInList in list){
+          if(itemInList.name == item.name){
+            break;
+          }
+          itemIndex++;
+        }
+        break;
+      }
+      categoryIndex++;
+    }
+    state.items[categoryIndex].removeAt(itemIndex);
+    // state.items
+    //     .map((e) => e.removeWhere((element) => element.name == item.name));
+    state.items.removeWhere((element) => element.isEmpty);
+    await _itemsListRepository.deleteItem(item.name, item.imageUrl);
+    emit(DeletedItemState(state.items));
+  }
+
+  Future<void> deleteCategory(String categoryName) async {
+    var categoryItems = [];
+    var index = 0;
+    for(var list in state.items){
+      if(list[0].category == categoryName){
+        categoryItems = list;
+        break;
+      }
+      index++;
+    }
+    for (var item in categoryItems) {
+      await _itemsListRepository.deleteItem(item.name, item.imageUrl);
+    }
+    state.items.removeAt(index);
+    await _itemsListRepository.deleteCategory(categoryName);
+    emit(DeletedCategoryState(state.items));
   }
 }

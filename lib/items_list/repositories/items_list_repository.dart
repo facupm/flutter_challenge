@@ -59,4 +59,13 @@ class ItemsListRepository {
     );
     return Color(color);
   }
+
+  Future<void> deleteItem(String name, String imageUrl) async {
+    await itemsCollection.doc(name).delete();
+    await firebaseStorage.refFromURL(imageUrl).delete();
+  }
+
+  Future<void> deleteCategory(String categoryName) async {
+    await categoriesCollection.doc(categoryName).delete();
+  }
 }
