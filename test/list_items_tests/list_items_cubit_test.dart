@@ -129,4 +129,32 @@ main() {
         verify(() => itemsListRepositoryMock.deleteItem(any(), any()))
             .called(1);
       });
+
+  blocTest('should emit [SearchedState] state when a word is searched',
+      build: () => itemsListCubit,
+      act: (ItemsListCubit bloc) {
+        bloc.state.items = [
+          [ItemWithColorModel(category: '', name: '', imageUrl: '')]
+        ];
+        bloc.state.searchedList = [];
+
+        bloc.search('');
+      },
+      expect: () => [
+        isA<SearchedState>(),
+      ],);
+
+  blocTest('should emit [LoadedItemsState] state when search is closed',
+    build: () => itemsListCubit,
+    act: (ItemsListCubit bloc) {
+      bloc.state.items = [
+        [ItemWithColorModel(category: '', name: '', imageUrl: '')]
+      ];
+      bloc.state.searchedList = [];
+
+      bloc.closeSearch();
+    },
+    expect: () => [
+      isA<LoadedItemsState>(),
+    ],);
 }
