@@ -44,7 +44,8 @@ class CreateItemRepository {
       await itemsCollection.doc(name).set({
         'name': name,
         'category': category,
-        'imageUrl': imageUrl
+        'imageUrl': imageUrl,
+        'isFavorite': false
       });
     } catch (e) {
       rethrow;

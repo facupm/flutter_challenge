@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_challege/items_list/models/item_with_category_color_model.dart';
+import 'package:flutter_challege/items_list/models/complete_item_model.dart';
 import 'package:flutter_challege/widgets/menu_drawer.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
@@ -54,6 +55,17 @@ class _ItemsListScreen extends State<ItemsListScreen> {
                       "Something went wrong. Please try again: ${state.error}",
                       context);
                 }
+                if (state is AddedToFavorites) {
+                  SchedulerBinding.instance?.addPostFrameCallback((_) {
+                    CustomSnackBar(
+                        "Item added to favorites successfully", context);
+                  });
+                }
+                if (state is AlreadyFavoriteErrorState) {
+                  SchedulerBinding.instance?.addPostFrameCallback((_) {
+                    CustomSnackBar("Item is already on favorites", context);
+                  });
+                }
                 if (state is SearchedState &&
                     listBloc.state.searchedList.isEmpty) {
                   return buildEmptySearch();
@@ -75,7 +87,7 @@ class _ItemsListScreen extends State<ItemsListScreen> {
   }
 
   Widget buildItemsList(
-      ItemsListCubit listBloc, List<List<ItemWithColorModel>> organizedItems) {
+      ItemsListCubit listBloc, List<List<CompleteItemModel>> organizedItems) {
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => ListView.builder(
@@ -85,7 +97,7 @@ class _ItemsListScreen extends State<ItemsListScreen> {
     );
   }
 
-  Widget buildItemsByCategory(List<ItemWithColorModel> organizedItem,
+  Widget buildItemsByCategory(List<CompleteItemModel> organizedItem,
       int categoryListIndex, ItemsListCubit listBloc) {
     var categoryName = organizedItem[0].category;
     // var categoryColor = await listBloc.getCategoryColor(categoryName);
@@ -120,7 +132,7 @@ class _ItemsListScreen extends State<ItemsListScreen> {
     );
   }
 
-  Widget buildItemCards(List<ItemWithColorModel> _items, int categoryListIndex,
+  Widget buildItemCards(List<CompleteItemModel> _items, int categoryListIndex,
       ItemsListCubit listBloc) {
     return BlocBuilder(
       bloc: listBloc,
@@ -150,7 +162,7 @@ class _ItemsListScreen extends State<ItemsListScreen> {
                 children: [
                   SlidableAction(
                     onPressed: (context) =>
-                        listBloc.addToFavorite(_items[index]),
+                        listBloc.addToFavorite(_items[index], index),
                     backgroundColor: Colors.redAccent,
                     foregroundColor: Colors.white,
                     icon: Icons.favorite,
@@ -168,12 +180,14 @@ class _ItemsListScreen extends State<ItemsListScreen> {
                   spacing: 12,
                   children: [
                     IconButton(
-                        onPressed: () => listBloc.addToFavorite(_items[index]),
-                        icon: const Icon(Icons.favorite_border)),
-                    const Icon(
-                      Icons.favorite,
-                      color: Colors.redAccent,
-                    ),
+                        onPressed: () =>
+                            listBloc.addToFavorite(_items[index], index),
+                        icon: _items[index].isFavorite
+                            ? const Icon(
+                                Icons.favorite,
+                                color: Colors.redAccent,
+                              )
+                            : const Icon(Icons.favorite_border)),
                     const Icon(Icons.drag_handle),
                   ],
                 ),
@@ -187,7 +201,7 @@ class _ItemsListScreen extends State<ItemsListScreen> {
     );
   }
 
-  void deleteItem(ItemWithColorModel item, ItemsListCubit listBloc) {
+  void deleteItem(CompleteItemModel item, ItemsListCubit listBloc) {
     showDialog(
         context: _formkey.currentContext!,
         builder: (BuildContext ctx) {
