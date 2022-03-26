@@ -34,7 +34,7 @@ class CreateItemCubit extends Cubit<CreateItemState> {
         CategoryLoaded(state.image, state.name, state.categories, newCategory));
   }
 
-  void changeImage(File imageTemporary) {
+  void changeImage(File? imageTemporary) {
     var message = FieldValidators.required(imageTemporary);
     if (message != null) {
       emit(ImageErrorState(state.image, state.name, state.categories,
