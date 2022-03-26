@@ -10,11 +10,17 @@ import '../../widgets/form_field_tag.dart';
 import '../cubits/items_list_cubit.dart';
 import '../repositories/items_list_repository.dart';
 
-class ItemsListScreen extends StatelessWidget {
+class ItemsListScreen extends StatefulWidget {
   final String title = 'Shopping List';
 
-  // const ItemsListScreen({Key? key}) : super(key: key);
+  @override
+  _ItemsListScreen createState() => _ItemsListScreen();
+}
+
+class _ItemsListScreen extends State<ItemsListScreen> {
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
+  Icon customIcon = const Icon(Icons.search);
+  Widget customSearchBar = const Text('Shopping List');
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +30,15 @@ class ItemsListScreen extends StatelessWidget {
         final listBloc = BlocProvider.of<ItemsListCubit>(context);
         return Scaffold(
             // backgroundColor: Constants.kPrimaryColor,
-            appBar: AppBar(title: Text(title)),
+            appBar: AppBar(
+              title: customSearchBar,
+              actions: [
+                IconButton(
+                  onPressed: () => onPressSearch(listBloc),
+                  icon: customIcon,
+                )
+              ],
+            ),
             drawer: const MenuDrawer(),
             body: BlocBuilder(
               key: _formkey,
@@ -40,21 +54,28 @@ class ItemsListScreen extends StatelessWidget {
                       "Something went wrong. Please try again: ${state.error}",
                       context);
                 }
+                if (state is SearchedState &&
+                    listBloc.state.searchedList.isEmpty) {
+                  return buildEmptySearch();
+                }
                 if (listBloc.state.items.isEmpty) {
                   return buildEmptyList();
                 }
-                if (state is LoadedItemsState) {
-                  return buildItemsList(listBloc);
+                if (state is SearchedState) {
+                  return buildItemsList(listBloc, listBloc.state.searchedList);
                 }
-                return buildItemsList(listBloc);
+                if (state is LoadedItemsState) {
+                  return buildItemsList(listBloc, listBloc.state.items);
+                }
+                return buildItemsList(listBloc, listBloc.state.items);
               },
             ));
       }),
     );
   }
 
-  Widget buildItemsList(ItemsListCubit listBloc) {
-    List<List<ItemWithColorModel>> organizedItems = listBloc.state.items;
+  Widget buildItemsList(
+      ItemsListCubit listBloc, List<List<ItemWithColorModel>> organizedItems) {
 
     return BlocBuilder(
       bloc: listBloc,
@@ -218,5 +239,52 @@ class ItemsListScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget buildEmptySearch() {
+    return Center(
+      child: SizedBox(
+        height: 40,
+        child: Column(
+          children: const [
+            Text('Oh oh. No elements found'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  onPressSearch(ItemsListCubit listBloc) {
+    setState(() {
+      if (customIcon.icon == Icons.search) {
+        customIcon = const Icon(Icons.cancel);
+        customSearchBar = ListTile(
+          leading: const Icon(
+            Icons.search,
+            color: Colors.white,
+            size: 25,
+          ),
+          title: TextField(
+            decoration: const InputDecoration(
+              hintText: 'Search...',
+              hintStyle: TextStyle(
+                color: Colors.white70,
+                fontSize: 18,
+                fontStyle: FontStyle.italic,
+              ),
+              border: InputBorder.none,
+            ),
+            style: const TextStyle(
+              color: Colors.white,
+            ),
+            onChanged: (value) => {listBloc.search(value)},
+          ),
+        );
+      } else {
+        listBloc.closeSearch();
+        customIcon = const Icon(Icons.search);
+        customSearchBar = Text(widget.title);
+      }
+    });
   }
 }
