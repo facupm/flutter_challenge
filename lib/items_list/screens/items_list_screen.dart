@@ -6,6 +6,7 @@ import 'package:flutter_challege/widgets/menu_drawer.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../utils/show_custom_snackbar.dart';
+import '../../widgets/form_field_tag.dart';
 import '../cubits/items_list_cubit.dart';
 import '../repositories/items_list_repository.dart';
 
@@ -84,13 +85,15 @@ class ItemsListScreen extends StatelessWidget {
           ],
         ),
         child: ExpansionTile(
-          title: Text(categoryName),
+          title: FormFieldTag(name: categoryName),
           // subtitle: Text('Trailing expansion arrow icon'),
           children: <Widget>[
             buildItemCards(organizedItem, categoryListIndex, listBloc)
           ],
-          // backgroundColor: organizedItem[0].color,
+          // backgroundColor: Color.fromRGBO(organizedItem[0].color!.red,
+          //     organizedItem[0].color!.green, organizedItem[0].color!.blue, 99),
           collapsedBackgroundColor: organizedItem[0].color,
+          textColor: organizedItem[0].color,
           initiallyExpanded: true,
         ),
       ),
@@ -207,7 +210,9 @@ class ItemsListScreen extends StatelessWidget {
         child: Column(
           children: const [
             Text('Looks like there are no elements yet'),
-            SizedBox(height: 5,),
+            SizedBox(
+              height: 5,
+            ),
             Text('Create items and come back to see them here!')
           ],
         ),
