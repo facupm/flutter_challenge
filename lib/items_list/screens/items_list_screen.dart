@@ -76,7 +76,6 @@ class _ItemsListScreen extends State<ItemsListScreen> {
 
   Widget buildItemsList(
       ItemsListCubit listBloc, List<List<ItemWithColorModel>> organizedItems) {
-
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => ListView.builder(
@@ -139,10 +138,23 @@ class _ItemsListScreen extends State<ItemsListScreen> {
                 children: [
                   SlidableAction(
                     onPressed: (context) => deleteItem(_items[index], listBloc),
-                    backgroundColor: const Color(0xFFFE4A49),
+                    backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
                     icon: Icons.delete,
                     label: 'Delete',
+                  ),
+                ],
+              ),
+              startActionPane: ActionPane(
+                motion: const ScrollMotion(),
+                children: [
+                  SlidableAction(
+                    onPressed: (context) =>
+                        listBloc.addToFavorite(_items[index]),
+                    backgroundColor: Colors.redAccent,
+                    foregroundColor: Colors.white,
+                    icon: Icons.favorite,
+                    label: 'Favorite',
                   ),
                 ],
               ),
@@ -152,7 +164,19 @@ class _ItemsListScreen extends State<ItemsListScreen> {
                 leading: CircleAvatar(
                   backgroundImage: NetworkImage(_items[index].imageUrl),
                 ),
-                trailing: const Icon(Icons.drag_handle),
+                trailing: Wrap(
+                  spacing: 12,
+                  children: [
+                    IconButton(
+                        onPressed: () => listBloc.addToFavorite(_items[index]),
+                        icon: const Icon(Icons.favorite_border)),
+                    const Icon(
+                      Icons.favorite,
+                      color: Colors.redAccent,
+                    ),
+                    const Icon(Icons.drag_handle),
+                  ],
+                ),
               ),
             ),
         ],

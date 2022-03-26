@@ -121,4 +121,6 @@ class ItemsListCubit extends Cubit<ItemsListState> {
   void closeSearch() {
     emit(LoadedItemsState(state.items));
   }
+
+  addToFavorite(ItemWithColorModel item) {}
 }
