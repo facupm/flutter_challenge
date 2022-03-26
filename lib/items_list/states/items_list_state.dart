@@ -2,11 +2,13 @@ part of '../cubits/items_list_cubit.dart';
 
 abstract class ItemsListState {
   late List<List<ItemWithColorModel>> items;
+  late List<List<ItemWithColorModel>> searchedList;
 }
 
 class InitialState extends ItemsListState {
   InitialState() {
     items = [];
+    searchedList = [];
   }
 }
 
@@ -43,6 +45,14 @@ class DeletedItemState extends ItemsListState {
 class DeletedCategoryState extends ItemsListState {
   DeletedCategoryState(List<List<ItemWithColorModel>> items) {
     this.items = items;
+  }
+}
+
+class SearchedState extends ItemsListState {
+  SearchedState(List<List<ItemWithColorModel>> items,
+      List<List<ItemWithColorModel>> searchedList) {
+    this.items = items;
+    this.searchedList = searchedList;
   }
 }
 
