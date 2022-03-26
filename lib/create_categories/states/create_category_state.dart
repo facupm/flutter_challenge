@@ -2,7 +2,7 @@ part of '../cubits/create_category_cubit.dart';
 
 abstract class CreateCategoryState {
   late String name;
-  late Color color;
+  late Color? color;
 }
 
 class InitialState extends CreateCategoryState {
@@ -43,7 +43,7 @@ class CreatedSuccessfullyState extends CreateCategoryState {
 class ErrorState extends CreateCategoryState {
   final String error;
 
-  ErrorState(String name, Color color, this.error) {
+  ErrorState(String name, Color? color, this.error) {
     this.name = name;
     this.color = color;
   }

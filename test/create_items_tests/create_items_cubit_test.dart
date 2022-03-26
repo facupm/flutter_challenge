@@ -126,22 +126,21 @@ main() {
         bloc.state.selectedCategory = "categoryName";
         bloc.state.image = File("");
         when(() =>
-            createItemRepositoryMock.createItem.call(any(), any(), any()))
+                createItemRepositoryMock.createItem.call(any(), any(), any()))
             .thenThrow(Exception());
 
         bloc.submit();
       },
       expect: () => [
-        isA<CreatingState>(),
-        isA<ErrorState>(),
-      ],
+            isA<CreatingState>(),
+            isA<ErrorState>(),
+          ],
       verify: (_) {
         verify(() => createItemRepositoryMock.createItem(any(), any(), any()))
             .called(1);
       });
 
-  blocTest(
-      'should emit [CreatingState, ErrorState] state when image is null',
+  blocTest('should emit [CreatingState, ErrorState] state when image is null',
       build: () => createItemCubit,
       act: (CreateItemCubit bloc) {
         bloc.state.name = "name";
@@ -151,46 +150,48 @@ main() {
         bloc.submit();
       },
       expect: () => [
-        isA<CreatingState>(),
-        isA<ErrorState>(),
-      ],
+            isA<CreatingState>(),
+            isA<ErrorState>(),
+          ],
       verify: (_) {
-        verifyNever(() => createItemRepositoryMock.createItem(any(), any(), any()));
+        verifyNever(
+            () => createItemRepositoryMock.createItem(any(), any(), any()));
+      });
+
+  blocTest('should emit [CreatingState, ErrorState] state when name is empty',
+      build: () => createItemCubit,
+      act: (CreateItemCubit bloc) {
+        bloc.state.name = "";
+        bloc.state.selectedCategory = "categoryName";
+        bloc.state.image = File('');
+
+        bloc.submit();
+      },
+      expect: () => [
+            isA<CreatingState>(),
+            isA<ErrorState>(),
+          ],
+      verify: (_) {
+        verifyNever(
+            () => createItemRepositoryMock.createItem(any(), any(), any()));
       });
 
   blocTest(
-    'should emit [CreatingState, ErrorState] state when name is empty',
-    build: () => createItemCubit,
-    act: (CreateItemCubit bloc) {
-      bloc.state.name = "";
-      bloc.state.selectedCategory = "categoryName";
-      bloc.state.image = File('');
+      'should emit [CreatingState, ErrorState] state when selectedCategory is empty',
+      build: () => createItemCubit,
+      act: (CreateItemCubit bloc) {
+        bloc.state.name = "name";
+        bloc.state.selectedCategory = "";
+        bloc.state.image = File('');
 
-      bloc.submit();
-    },
-    expect: () => [
-      isA<CreatingState>(),
-      isA<ErrorState>(),
-    ],
+        bloc.submit();
+      },
+      expect: () => [
+            isA<CreatingState>(),
+            isA<ErrorState>(),
+          ],
       verify: (_) {
-        verifyNever(() => createItemRepositoryMock.createItem(any(), any(), any()));
-      });
-
-  blocTest(
-    'should emit [CreatingState, ErrorState] state when selectedCategory is empty',
-    build: () => createItemCubit,
-    act: (CreateItemCubit bloc) {
-      bloc.state.name = "name";
-      bloc.state.selectedCategory = "";
-      bloc.state.image = File('');
-
-      bloc.submit();
-    },
-    expect: () => [
-      isA<CreatingState>(),
-      isA<ErrorState>(),
-    ],
-      verify: (_) {
-        verifyNever(() => createItemRepositoryMock.createItem(any(), any(), any()));
+        verifyNever(
+            () => createItemRepositoryMock.createItem(any(), any(), any()));
       });
 }

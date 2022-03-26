@@ -17,30 +17,32 @@ class CreateCategoryCubit extends Cubit<CreateCategoryState> {
     emit(ColorChangeState(state.name, newColor));
   }
 
-  FutureOr<void> submit() async {
+  Future<void> submit() async {
     try {
       emit(CreatingState(state.name, state.color));
 
 
       if(FieldValidators.required(state.name) != null){
-        emit(ErrorState(state.name, state.color, "You must enter a name"));
+        emit(ErrorState(state.name, state.color!, "You must enter a name"));
+        return;
       }
       if(FieldValidators.required(state.color) != null){
         emit(ErrorState(state.name, state.color, "You must select a color"));
+        return;
       }
 
       await _createCategoryRepository.createCategory(
-          state.name, state.color.value);
+          state.name, state.color!.value);
       emit(CreatedSuccessfullyState());
     } on Exception catch (e) {
-      emit(ErrorState(state.name, state.color, e.toString()));
+      emit(ErrorState(state.name, state.color!, e.toString()));
     }
   }
 
   void changeName(String? value) {
     var message = FieldValidators.required(value);
     if (message != null) {
-      emit(NameErrorState(state.name, state.color, message));
+      emit(NameErrorState(state.name, state.color!, message));
       return;
     }
     state.name = value!;
