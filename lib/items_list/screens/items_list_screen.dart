@@ -10,7 +10,7 @@ import '../cubits/items_list_cubit.dart';
 import '../repositories/items_list_repository.dart';
 
 class ItemsListScreen extends StatelessWidget {
-  final String title = 'Create Item';
+  final String title = 'Shopping List';
 
   // const ItemsListScreen({Key? key}) : super(key: key);
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
@@ -38,6 +38,9 @@ class ItemsListScreen extends StatelessWidget {
                   CustomSnackBar(
                       "Something went wrong. Please try again: ${state.error}",
                       context);
+                }
+                if (listBloc.state.items.isEmpty) {
+                  return buildEmptyList();
                 }
                 if (state is LoadedItemsState) {
                   return buildItemsList(listBloc);
@@ -197,28 +200,18 @@ class ItemsListScreen extends StatelessWidget {
         });
   }
 
-// buildItemCard(ItemWithColorModel organizedItem) {
-//   return Slidable(
-//     endActionPane: ActionPane(
-//       motion: const ScrollMotion(),
-//       children: [
-//         SlidableAction(
-//           onPressed: (context) => doNothing(),
-//           backgroundColor: const Color(0xFFFE4A49),
-//           foregroundColor: Colors.white,
-//           icon: Icons.delete,
-//           label: 'Delete',
-//         ),
-//       ],
-//     ),
-//     child: Card(
-//       child: ListTile(
-//         title: Text(organizedItem.name),
-//         leading: CircleAvatar(
-//           backgroundImage: NetworkImage(organizedItem.imageUrl),
-//         ),
-//       ),
-//     ),
-//   );
-// }
+  Widget buildEmptyList() {
+    return Center(
+      child: SizedBox(
+        height: 40,
+        child: Column(
+          children: const [
+            Text('Looks like there are no elements yet'),
+            SizedBox(height: 5,),
+            Text('Create items and come back to see them here!')
+          ],
+        ),
+      ),
+    );
+  }
 }

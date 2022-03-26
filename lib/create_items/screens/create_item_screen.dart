@@ -36,85 +36,79 @@ class _CreateItemScreen extends State<CreateItemScreen> {
             ModalRoute.of(context)!.settings.arguments as Map<String, String>?;
         Size size = MediaQuery.of(context).size;
         final formBloc = BlocProvider.of<CreateItemCubit>(context);
-        return Scaffold(
-            // backgroundColor: Constants.kPrimaryColor,
-            appBar: AppBar(
-              title: Text(widget.title),
-            ),
-            drawer: const MenuDrawer(),
-            body: BlocListener<CreateItemCubit, CreateItemState>(
-                key: _formkey,
-                listener: (context, state) {
-                  if (state is CreatedSuccessfullyState) {
-                    LoadingDialog.hide(context);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Item created successfully"),
-                      duration: Duration(seconds: 2),
-                    ));
-                  }
-                  if (state is CreatingState) {
-                    LoadingDialog.show(context);
-                  }
-                  if (state is ErrorState) {
-                    LoadingDialog.hide(context);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(
-                          "Something went wrong. Please try again: ${state.error}"),
-                      duration: Duration(seconds: 2),
-                    ));
-                    // }
-                  }
-                },
-                child: SingleChildScrollView(
-                  // physics: const ClampingScrollPhysics(),
-                  padding:
-                      const EdgeInsets.only(top: 40.0, left: 24, right: 24),
-                  child: Column(
-                    children: <Widget>[
-                      GestureDetector(
-                          onTap: () async {
-                            await pickImage(formBloc);
-                          },
-                          child: BlocBuilder<CreateItemCubit, CreateItemState>(
-                            bloc: formBloc,
-                            builder: (context, state) => ClipRRect(
-                              child: formBloc.state.image != null
-                                  ? Image.file(formBloc.state.image!,
-                                      width: 136.0,
-                                      height: 136.0,
-                                      fit: BoxFit.cover)
-                                  : const Image(
-                                      image: AssetImage(
-                                          'assets/images/add-image-icon.png'),
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover),
-                            ),
-                          )),
-                      SizedBox(height: 10),
-                      FormFieldTag(name: "Name"),
-                      BlocBuilder(
+        return BlocListener<CreateItemCubit, CreateItemState>(
+            key: _formkey,
+            listener: (context, state) {
+              if (state is CreatedSuccessfullyState) {
+                LoadingDialog.hide(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text("Item created successfully"),
+                  duration: Duration(seconds: 2),
+                ));
+              }
+              if (state is CreatingState) {
+                LoadingDialog.show(context);
+              }
+              if (state is ErrorState) {
+                LoadingDialog.hide(context);
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(
+                      "Something went wrong. Please try again: ${state.error}"),
+                  duration: Duration(seconds: 2),
+                ));
+                // }
+              }
+            },
+            child: SingleChildScrollView(
+              // physics: const ClampingScrollPhysics(),
+              padding:
+              const EdgeInsets.only(top: 40.0, left: 24, right: 24),
+              child: Column(
+                children: <Widget>[
+                  GestureDetector(
+                      onTap: () async {
+                        await pickImage(formBloc);
+                      },
+                      child: BlocBuilder<CreateItemCubit, CreateItemState>(
                         bloc: formBloc,
-                        builder: (context, state) => CustomTextField(
-                          key: Key("nameField"),
-                          // bloc: formBloc.name,
-                          // isEnabled: !isLoading,
-                          keyboard: TextInputType.name,
-                          label: "Enter a name",
-                          hint: 'Enter an item name',
-                          onChange: (value) => {formBloc.changeName(value)},
-                          error: state is NameErrorState ? state.error : null,
-                          // icon: Icon(Icons.email)
+                        builder: (context, state) => ClipRRect(
+                          child: formBloc.state.image != null
+                              ? Image.file(formBloc.state.image!,
+                              width: 136.0,
+                              height: 136.0,
+                              fit: BoxFit.cover)
+                              : const Image(
+                              image: AssetImage(
+                                  'assets/images/add-image-icon.png'),
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover),
                         ),
-                      ),
-                      SizedBox(height: 20),
-                      FormFieldTag(name: "Category"),
-                      BlocBuilder(
-                        bloc: formBloc,
-                        builder: (context, state) =>
-                            DropdownButtonFormField<String>(
-                              // value: state is CategoryLoaded ? state.selectedCategory : formBloc.state.selectedCategory,
-                              // value: "b",
+                      )),
+                  SizedBox(height: 10),
+                  FormFieldTag(name: "Name"),
+                  BlocBuilder(
+                    bloc: formBloc,
+                    builder: (context, state) => CustomTextField(
+                      key: Key("nameField"),
+                      // bloc: formBloc.name,
+                      // isEnabled: !isLoading,
+                      keyboard: TextInputType.name,
+                      label: "Enter a name",
+                      hint: 'Enter an item name',
+                      onChange: (value) => {formBloc.changeName(value)},
+                      error: state is NameErrorState ? state.error : null,
+                      // icon: Icon(Icons.email)
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  FormFieldTag(name: "Category"),
+                  BlocBuilder(
+                    bloc: formBloc,
+                    builder: (context, state) =>
+                        DropdownButtonFormField<String>(
+                          // value: state is CategoryLoaded ? state.selectedCategory : formBloc.state.selectedCategory,
+                          // value: "b",
                           decoration: InputDecoration(
                               errorText: state is CategoryErrorState
                                   ? state.error
@@ -125,7 +119,7 @@ class _CreateItemScreen extends State<CreateItemScreen> {
                                   vertical: 16, horizontal: 16),
                               border: OutlineInputBorder(
                                 borderSide:
-                                    BorderSide(color: Colors.grey[400]!),
+                                BorderSide(color: Colors.grey[400]!),
                                 borderRadius: BorderRadius.circular(15),
                               )),
                           // items: getMenuItems(["a", "b"]),
@@ -134,29 +128,29 @@ class _CreateItemScreen extends State<CreateItemScreen> {
                             formBloc.changeCategory(value);
                           },
                         ),
-                      ),
-                      SizedBox(height: 20),
-                      // !isLoading ?
-                      SizedBox(
-                        width: size.width * 0.8,
-                        child: OutlinedButton(
-                          onPressed: () {
-                            formBloc.submit();
-                          },
-                          child: Text("Create"),
-                          style: ButtonStyle(
-                              foregroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.white),
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.black87),
-                              side: MaterialStateProperty.all<BorderSide>(
-                                  BorderSide.none)),
-                        ),
-                      )
-                      // : CircularProgressIndicator(),
-                    ],
                   ),
-                )));
+                  SizedBox(height: 20),
+                  // !isLoading ?
+                  SizedBox(
+                    width: size.width * 0.8,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        formBloc.submit();
+                      },
+                      child: Text("Create"),
+                      style: ButtonStyle(
+                          foregroundColor: MaterialStateProperty.all<Color>(
+                              Colors.white),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Colors.black87),
+                          side: MaterialStateProperty.all<BorderSide>(
+                              BorderSide.none)),
+                    ),
+                  )
+                  // : CircularProgressIndicator(),
+                ],
+              ),
+            ));
       }),
     );
   }
