@@ -34,6 +34,18 @@ class ItemsRearrangedState extends ItemsListState {
   }
 }
 
+class DeletedItemState extends ItemsListState {
+  DeletedItemState(List<List<ItemWithColorModel>> items) {
+    this.items = items;
+  }
+}
+
+class DeletedCategoryState extends ItemsListState {
+  DeletedCategoryState(List<List<ItemWithColorModel>> items) {
+    this.items = items;
+  }
+}
+
 class ErrorState extends ItemsListState {
   final String error;
 

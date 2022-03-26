@@ -52,10 +52,13 @@ class ItemsListScreen extends StatelessWidget {
   Widget buildItemsList(ItemsListCubit listBloc) {
     List<List<ItemWithColorModel>> organizedItems = listBloc.state.items;
 
-    return ListView.builder(
-        itemCount: organizedItems.length,
-        itemBuilder: (context, index) =>
-            buildItemsByCategory(organizedItems[index], index, listBloc));
+    return BlocBuilder(
+      bloc: listBloc,
+      builder: (context, state) => ListView.builder(
+          itemCount: organizedItems.length,
+          itemBuilder: (context, index) =>
+              buildItemsByCategory(organizedItems[index], index, listBloc)),
+    );
   }
 
   Widget buildItemsByCategory(List<ItemWithColorModel> organizedItem,
@@ -69,7 +72,7 @@ class ItemsListScreen extends StatelessWidget {
           motion: const ScrollMotion(),
           children: [
             SlidableAction(
-              onPressed: (context) => deleteCategory(),
+              onPressed: (context) => deleteCategory(categoryName, listBloc),
               backgroundColor: const Color(0xFFFE4A49),
               foregroundColor: Colors.white,
               icon: Icons.delete,
@@ -108,7 +111,7 @@ class ItemsListScreen extends StatelessWidget {
                 motion: const ScrollMotion(),
                 children: [
                   SlidableAction(
-                    onPressed: (context) => deleteItem(),
+                    onPressed: (context) => deleteItem(_items[index], listBloc),
                     backgroundColor: const Color(0xFFFE4A49),
                     foregroundColor: Colors.white,
                     icon: Icons.delete,
@@ -133,7 +136,7 @@ class ItemsListScreen extends StatelessWidget {
     );
   }
 
-  void deleteItem() {
+  void deleteItem(ItemWithColorModel item, ItemsListCubit listBloc) {
     showDialog(
         context: _formkey.currentContext!,
         builder: (BuildContext ctx) {
@@ -143,6 +146,7 @@ class ItemsListScreen extends StatelessWidget {
             actions: [
               TextButton(
                   onPressed: () {
+                    listBloc.deleteItem(item);
                     Navigator.of(_formkey.currentContext!).pop();
                   },
                   child: const Text('Yes')),
@@ -156,7 +160,7 @@ class ItemsListScreen extends StatelessWidget {
         });
   }
 
-  void deleteCategory() {
+  void deleteCategory(String category, ItemsListCubit listBloc) {
     showDialog(
         context: _formkey.currentContext!,
         builder: (BuildContext ctx) {
@@ -179,6 +183,7 @@ class ItemsListScreen extends StatelessWidget {
             actions: [
               TextButton(
                   onPressed: () {
+                    listBloc.deleteCategory(category);
                     Navigator.of(_formkey.currentContext!).pop();
                   },
                   child: const Text('Yes')),
