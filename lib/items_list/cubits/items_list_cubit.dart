@@ -92,4 +92,33 @@ class ItemsListCubit extends Cubit<ItemsListState> {
     await _itemsListRepository.deleteCategory(categoryName);
     emit(DeletedCategoryState(state.items));
   }
+
+  search(String value) {
+    if(value != ""){
+      List<List<ItemWithColorModel>> categoriesList = [];
+      for(var list in state.items){
+        if(list[0].category == value) {
+          categoriesList.add(list);
+          continue;
+        }else{
+          List<ItemWithColorModel> itemList = [];
+          for(var itemInList in list){
+            if(itemInList.name == value){
+              itemList.add(itemInList);
+              break;
+            }
+          }
+          if(itemList.isNotEmpty){
+            categoriesList.add(itemList);
+          }
+        }
+      }
+    state.searchedList = categoriesList;
+    }
+    emit(SearchedState(state.items, state.searchedList));
+  }
+
+  void closeSearch() {
+    emit(LoadedItemsState(state.items));
+  }
 }
