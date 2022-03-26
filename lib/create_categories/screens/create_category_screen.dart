@@ -138,7 +138,7 @@ class _CreateCategoryScreen extends State<CreateCategoryScreen> {
                                         child: ColorPicker(
                                           enableAlpha: false,
                                           portraitOnly: true,
-                                          pickerColor: formBloc.state.color,
+                                          pickerColor: formBloc.state.color!,
                                           onColorChanged: (Color color) {
                                             formBloc.changeColor(color);
                                           },
@@ -158,7 +158,7 @@ class _CreateCategoryScreen extends State<CreateCategoryScreen> {
                               },
                               child: CircleColor(
                                 circleSize: 40,
-                                color: formBloc.state.color,
+                                color: formBloc.state.color!,
                                 elevation: 5,
                                 iconSelected: Icons.add,
                                 isSelected: true,
