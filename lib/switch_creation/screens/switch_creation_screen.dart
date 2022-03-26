@@ -7,7 +7,6 @@ import '../../create_items/screens/create_item_screen.dart';
 import '../cubits/switch_creation_cubit.dart';
 
 class SwitchCreationScreen extends StatelessWidget {
-
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
   @override
@@ -18,28 +17,61 @@ class SwitchCreationScreen extends StatelessWidget {
         final switchBloc = BlocProvider.of<SwitchCreationCubit>(context);
         return Scaffold(
             appBar: AppBar(
-              title: Text(switchBloc.state.pageTitle),
-              actions: [
-                Switch(
-                    value: switchBloc.state.itemScreen,
-                    onChanged: (val) {
-                      switchBloc.changeScreen();
-                    }),
-              ],
+              title: BlocBuilder(
+                  bloc: switchBloc,
+                  builder: (context, state) =>
+                      Text(switchBloc.state.pageTitle)),
             ),
             drawer: const MenuDrawer(),
             body: BlocBuilder(
               key: _formkey,
               bloc: switchBloc,
               builder: (context, state) {
-                if (switchBloc.state.itemScreen) {
-                  return CreateItemScreen();
-                } else {
-                  return CreateCategoryScreen();
-                }
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      buildSwitch(switchBloc),
+                      switchBloc.state.itemScreen
+                          ? CreateItemScreen()
+                          : CreateCategoryScreen(),
+                    ],
+                  ),
+                );
               },
             ));
       }),
+    );
+  }
+
+  buildSwitch(SwitchCreationCubit switchBloc) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        buildSwitchText("Category"),
+        BlocBuilder(
+          bloc: switchBloc,
+          builder: (context, state) => Switch(
+            value: switchBloc.state.itemScreen,
+            onChanged: (val) {
+              switchBloc.changeScreen();
+            },
+            activeColor: Colors.grey,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 10),
+          child: buildSwitchText("Item"),
+        ),
+      ],
+    );
+  }
+
+  buildSwitchText(String text) {
+    return Column(
+      children: [
+        const Text("Show"),
+        Text(text),
+      ],
     );
   }
 }
