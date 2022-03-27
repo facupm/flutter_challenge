@@ -1,11 +1,10 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import '../../models/complete_item_model.dart';
 
-class ItemsListRepository {
+class FavoritesListRepository {
   final CollectionReference itemsCollection =
   FirebaseFirestore.instance.collection('items');
   final CollectionReference categoriesCollection =
@@ -14,10 +13,12 @@ class ItemsListRepository {
   firebase_storage.FirebaseStorage firebaseStorage =
       firebase_storage.FirebaseStorage.instance;
 
-  Future<List<CompleteItemModel>> getItems() async {
-    List<CompleteItemModel> items = [];
+  Future<List<CompleteItemModel>> getFavorites() async {
+    List<CompleteItemModel> favorites = [];
     await itemsCollection
         .orderBy('category', descending: false)
+        .orderBy('favoriteDate')
+        .where('isFavorite', isEqualTo: true)
         .get()
         .then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
@@ -26,23 +27,20 @@ class ItemsListRepository {
           category: doc["category"],
           imageUrl: doc["imageUrl"],
           isFavorite: doc["isFavorite"],
+          favoriteDate: (doc["favoriteDate"]).toDate(),
         );
-        items.add(item);
+        favorites.add(item);
       });
     });
-    await setColorOnItem(items);
-    return items;
+    await setColorOnItem(favorites);
+    return favorites;
   }
 
-  Future<DocumentSnapshot<Object?>> getCategory(String categoryName) async {
-    return await itemsCollection.doc(categoryName).get();
-  }
-
-  Future<void> setColorOnItem(List<CompleteItemModel> items) async {
-    if (items.isNotEmpty) {
-      String categoryName = items[0].category;
+  Future<void> setColorOnItem(List<CompleteItemModel> favorites) async {
+    if (favorites.isNotEmpty) {
+      String categoryName = favorites[0].category;
       Color color = await getColorFromCategory(categoryName);
-      for (var item in items) {
+      for (var item in favorites) {
         if (item.category != categoryName) {
           categoryName = item.category;
           color = await getColorFromCategory(categoryName);
@@ -61,17 +59,6 @@ class ItemsListRepository {
     return Color(color);
   }
 
-  Future<void> deleteItem(String name, String imageUrl) async {
-    await itemsCollection.doc(name).delete();
-    await firebaseStorage.refFromURL(imageUrl).delete();
-  }
-
-  Future<void> deleteCategory(String categoryName) async {
-    await categoriesCollection.doc(categoryName).delete();
-  }
-
-  Future<void> addToFavorite(String name) async {
-    await itemsCollection.doc(name)
-        .update({'isFavorite': true, 'favoriteDate': DateTime.now()});
-  }
+  removeFromFavorites(String name) async {
+    await itemsCollection.doc(name).update({'isFavorite': false});}
 }

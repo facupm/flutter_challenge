@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../models/complete_item_model.dart';
+import '../../models/complete_item_model.dart';
 import '../repositories/items_list_repository.dart';
 
 part '../states/items_list_state.dart';

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_challege/items_list/models/complete_item_model.dart';
+import '../../models/complete_item_model.dart';
 import 'package:flutter_challege/widgets/menu_drawer.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
@@ -188,7 +188,10 @@ class _ItemsListScreen extends State<ItemsListScreen> {
                                 color: Colors.redAccent,
                               )
                             : const Icon(Icons.favorite_border)),
-                    const Icon(Icons.drag_handle),
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: const Icon(Icons.drag_handle),
+                    ),
                   ],
                 ),
               ),

@@ -3,6 +3,7 @@ import 'package:flutter_challege/create_items/screens/create_item_screen.dart';
 import 'package:flutter_challege/switch_creation/screens/switch_creation_screen.dart';
 
 import '../create_categories/screens/create_category_screen.dart';
+import '../favorites_list/screens/favorites_list_screen.dart';
 import '../items_list/screens/items_list_screen.dart';
 
 class MenuDrawer extends StatelessWidget {
@@ -47,24 +48,15 @@ class MenuDrawer extends StatelessWidget {
               );
             },
           ),
-          // ListTile(
-          //   title: const Text('Create item'),
-          //   onTap: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(builder: (context) => CreateItemScreen()),
-          //     );
-          //   },
-          // ),
-          // ListTile(
-          //   title: const Text('Create category'),
-          //   onTap: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(builder: (context) => CreateCategoryScreen()),
-          //     );
-          //   },
-          // ),
+          ListTile(
+            title: const Text('Favorites List'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FavoritesListScreen()),
+              );
+            },
+          ),
           ListTile(
             title: const Text('Create elements'),
             onTap: () {
