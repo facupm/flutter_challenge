@@ -108,7 +108,7 @@ class FavoritesListScreen extends StatelessWidget {
                 motion: const ScrollMotion(),
                 children: [
                   SlidableAction(
-                    onPressed: (context) => listBloc.removeFromFavorites(_favorites[index]),
+                    onPressed: (context) => listBloc.removeFromFavorites(_favorites[index], index),
                     backgroundColor: Colors.redAccent,
                     foregroundColor: Colors.white,
                     icon: Icons.heart_broken,
@@ -127,12 +127,16 @@ class FavoritesListScreen extends StatelessWidget {
                   children: [
                     IconButton(
                         onPressed: () =>
-                            listBloc.removeFromFavorites(_favorites[index]),
+                            listBloc.removeFromFavorites(_favorites[index], index),
                         icon: const Icon(
                           Icons.favorite,
                           color: Colors.redAccent,
                         )),
-                    const Icon(Icons.drag_handle),
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: const Icon(Icons.drag_handle),
+                    ),
+                    // const Icon(Icons.drag_handle),
                   ],
                 ),
               ),

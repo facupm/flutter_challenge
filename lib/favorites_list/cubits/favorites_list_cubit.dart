@@ -24,7 +24,8 @@ class FavoritesListCubit extends Cubit<FavoritesListState> {
     }
   }
 
-  List<List<CompleteItemModel>> organizeFavorites(List<CompleteItemModel> items) {
+  List<List<CompleteItemModel>> organizeFavorites(
+      List<CompleteItemModel> items) {
     if (items.isEmpty) {
       return [];
     }
@@ -47,10 +48,26 @@ class FavoritesListCubit extends Cubit<FavoritesListState> {
     if (oldIndex < newIndex) {
       newIndex -= 1;
     }
-    CompleteItemModel item = state.favorites[categoryListIndex].removeAt(oldIndex);
+    CompleteItemModel item = state.favorites[categoryListIndex].removeAt(
+        oldIndex);
     state.favorites[categoryListIndex].insert(newIndex, item);
     emit(ItemsRearrangedState(state.favorites));
   }
 
-  removeFromFavorites(CompleteItemModel favorite) {}
+  Future<void> removeFromFavorites(CompleteItemModel favorite,
+      int index) async {
+    try {
+      await _favoritesListRepository.removeFromFavorites(favorite.name);
+      for (var categories in state.favorites) {
+        if (categories[0].category == favorite.category) {
+          categories.removeAt(index);
+          break;
+        }
+      }
+      state.favorites.removeWhere((element) => element.isEmpty);
+      emit(RemovedToFavorites(state.favorites));
+    } catch (e) {
+      emit(ErrorState(state.favorites, e.toString()));
+    }
+  }
 }

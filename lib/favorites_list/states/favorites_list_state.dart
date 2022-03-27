@@ -2,7 +2,6 @@ part of '../cubits/favorites_list_cubit.dart';
 
 abstract class FavoritesListState {
   late List<List<CompleteItemModel>> favorites;
-  late List<List<CompleteItemModel>> searchedList;
 }
 
 class InitialState extends FavoritesListState {
@@ -24,7 +23,7 @@ class LoadedFavoritesState extends FavoritesListState {
 }
 
 class RemovedToFavorites extends FavoritesListState {
-  RemovedToFavorites(List<List<CompleteItemModel>> items) {
+  RemovedToFavorites(List<List<CompleteItemModel>> favorites) {
     this.favorites = favorites;
   }
 }

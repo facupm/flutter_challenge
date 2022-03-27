@@ -5,8 +5,8 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import '../../models/complete_item_model.dart';
 
 class FavoritesListRepository {
-  final CollectionReference favoritesCollection =
-  FirebaseFirestore.instance.collection('favorites');
+  final CollectionReference itemsCollection =
+  FirebaseFirestore.instance.collection('items');
   final CollectionReference categoriesCollection =
   FirebaseFirestore.instance.collection('categories');
 
@@ -15,8 +15,9 @@ class FavoritesListRepository {
 
   Future<List<CompleteItemModel>> getFavorites() async {
     List<CompleteItemModel> favorites = [];
-    await favoritesCollection
+    await itemsCollection
         .orderBy('category', descending: false)
+        .where('isFavorite', isEqualTo: true)
         .get()
         .then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
@@ -26,6 +27,7 @@ class FavoritesListRepository {
           imageUrl: doc["imageUrl"],
           isFavorite: doc["isFavorite"],
         );
+        print(item);
         favorites.add(item);
       });
     });
@@ -55,4 +57,7 @@ class FavoritesListRepository {
         .then((doc) => color = doc["color"]);
     return Color(color);
   }
+
+  removeFromFavorites(String name) async {
+    await itemsCollection.doc(name).update({'isFavorite': false});}
 }
