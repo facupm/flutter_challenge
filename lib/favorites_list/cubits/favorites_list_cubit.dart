@@ -51,7 +51,7 @@ class FavoritesListCubit extends Cubit<FavoritesListState> {
     CompleteItemModel item = state.favorites[categoryListIndex].removeAt(
         oldIndex);
     state.favorites[categoryListIndex].insert(newIndex, item);
-    emit(ItemsRearrangedState(state.favorites));
+    emit(FavoritesRearrangedState(state.favorites));
   }
 
   Future<void> removeFromFavorites(CompleteItemModel favorite,
