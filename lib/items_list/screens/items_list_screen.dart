@@ -188,7 +188,10 @@ class _ItemsListScreen extends State<ItemsListScreen> {
                                 color: Colors.redAccent,
                               )
                             : const Icon(Icons.favorite_border)),
-                    const Icon(Icons.drag_handle),
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: const Icon(Icons.drag_handle),
+                    ),
                   ],
                 ),
               ),

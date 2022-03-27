@@ -18,7 +18,8 @@ class FavoritesListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<FavoritesListCubit>(
-      create: (context) => FavoritesListCubit(FavoritesListRepository())..getFavorites(),
+      create: (context) =>
+          FavoritesListCubit(FavoritesListRepository())..getFavorites(),
       child: Builder(builder: (context) {
         final listBloc = BlocProvider.of<FavoritesListCubit>(context);
         return Scaffold(
@@ -59,14 +60,14 @@ class FavoritesListScreen extends StatelessWidget {
     );
   }
 
-  Widget buildFavoritesList(
-      FavoritesListCubit listBloc, List<List<CompleteItemModel>> organizedFavorites) {
+  Widget buildFavoritesList(FavoritesListCubit listBloc,
+      List<List<CompleteItemModel>> organizedFavorites) {
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => ListView.builder(
           itemCount: organizedFavorites.length,
-          itemBuilder: (context, index) =>
-              buildFavoritesByCategory(organizedFavorites[index], index, listBloc)),
+          itemBuilder: (context, index) => buildFavoritesByCategory(
+              organizedFavorites[index], index, listBloc)),
     );
   }
 
@@ -91,8 +92,8 @@ class FavoritesListScreen extends StatelessWidget {
     );
   }
 
-  Widget buildItemCards(List<CompleteItemModel> _favorites, int categoryListIndex,
-      FavoritesListCubit listBloc) {
+  Widget buildItemCards(List<CompleteItemModel> _favorites,
+      int categoryListIndex, FavoritesListCubit listBloc) {
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => ReorderableListView(
@@ -108,7 +109,8 @@ class FavoritesListScreen extends StatelessWidget {
                 motion: const ScrollMotion(),
                 children: [
                   SlidableAction(
-                    onPressed: (context) => listBloc.removeFromFavorites(_favorites[index], index),
+                    onPressed: (context) =>
+                        listBloc.removeFromFavorites(_favorites[index], index),
                     backgroundColor: Colors.redAccent,
                     foregroundColor: Colors.white,
                     icon: Icons.heart_broken,
@@ -119,6 +121,10 @@ class FavoritesListScreen extends StatelessWidget {
               child: ListTile(
                 key: Key('item$index'),
                 title: Text(_favorites[index].name),
+                subtitle: Text(
+                  "Added on: ${getFormatedDate(_favorites[index].favoriteDate!)}",
+                  style: const TextStyle(color: Colors.grey),
+                ),
                 leading: CircleAvatar(
                   backgroundImage: NetworkImage(_favorites[index].imageUrl),
                 ),
@@ -126,8 +132,8 @@ class FavoritesListScreen extends StatelessWidget {
                   spacing: 12,
                   children: [
                     IconButton(
-                        onPressed: () =>
-                            listBloc.removeFromFavorites(_favorites[index], index),
+                        onPressed: () => listBloc.removeFromFavorites(
+                            _favorites[index], index),
                         icon: const Icon(
                           Icons.favorite,
                           color: Colors.redAccent,
@@ -164,5 +170,9 @@ class FavoritesListScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String getFormatedDate(DateTime dateTime) {
+    return "${dateTime.month}/${dateTime.day}/${dateTime.year}";
   }
 }

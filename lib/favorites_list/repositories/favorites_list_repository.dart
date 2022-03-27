@@ -17,6 +17,7 @@ class FavoritesListRepository {
     List<CompleteItemModel> favorites = [];
     await itemsCollection
         .orderBy('category', descending: false)
+        .orderBy('favoriteDate')
         .where('isFavorite', isEqualTo: true)
         .get()
         .then((QuerySnapshot querySnapshot) {
@@ -26,8 +27,8 @@ class FavoritesListRepository {
           category: doc["category"],
           imageUrl: doc["imageUrl"],
           isFavorite: doc["isFavorite"],
+          favoriteDate: (doc["favoriteDate"]).toDate(),
         );
-        print(item);
         favorites.add(item);
       });
     });

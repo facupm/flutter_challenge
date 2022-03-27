@@ -7,9 +7,9 @@ import '../../models/complete_item_model.dart';
 
 class ItemsListRepository {
   final CollectionReference itemsCollection =
-      FirebaseFirestore.instance.collection('items');
+  FirebaseFirestore.instance.collection('items');
   final CollectionReference categoriesCollection =
-      FirebaseFirestore.instance.collection('categories');
+  FirebaseFirestore.instance.collection('categories');
 
   firebase_storage.FirebaseStorage firebaseStorage =
       firebase_storage.FirebaseStorage.instance;
@@ -71,6 +71,7 @@ class ItemsListRepository {
   }
 
   Future<void> addToFavorite(String name) async {
-    await itemsCollection.doc(name).update({'isFavorite': true});
+    await itemsCollection.doc(name)
+        .update({'isFavorite': true, 'favoriteDate': DateTime.now()});
   }
 }

@@ -6,6 +6,7 @@ class CompleteItemModel {
     required this.category,
     required this.imageUrl,
     required this.isFavorite,
+    this.favoriteDate,
   });
 
   final String name;
@@ -13,4 +14,5 @@ class CompleteItemModel {
   final String imageUrl;
   late final Color? color;
   late bool isFavorite;
+  late DateTime? favoriteDate;
 }
