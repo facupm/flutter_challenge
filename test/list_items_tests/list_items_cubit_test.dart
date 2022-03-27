@@ -62,7 +62,7 @@ main() {
         verify(() => itemsListRepositoryMock.getItems()).called(1);
       });
 
-  blocTest('should not emit anithing if list is empty when organizing items',
+  blocTest('should not emit anything if list is empty when organizing items',
       build: () => itemsListCubit,
       act: (ItemsListCubit bloc) {
         bloc.state.items = [];

@@ -28,8 +28,8 @@ class RemovedToFavorites extends FavoritesListState {
   }
 }
 
-class ItemsRearrangedState extends FavoritesListState {
-  ItemsRearrangedState(List<List<CompleteItemModel>> favorites) {
+class FavoritesRearrangedState extends FavoritesListState {
+  FavoritesRearrangedState(List<List<CompleteItemModel>> favorites) {
     this.favorites = favorites;
   }
 }
