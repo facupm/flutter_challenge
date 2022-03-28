@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_challege/utils/form_validators.dart';
 
+import '../exceptions/item_already_exists.dart';
 import '../repositories/create_item_repository.dart';
 
 part '../states/create_item_state.dart';
@@ -83,10 +84,14 @@ class CreateItemCubit extends Cubit<CreateItemState> {
           state.name, state.selectedCategory, state.image);
       state.name = "";
       state.selectedCategory = "";
-      // category.clear();
       state.image = null;
       emit(CreatedSuccessfullyState(state.categories));
-    } on Exception catch (e) {
+    }
+    on ItemAlreadyExistsException catch (e) {
+      emit(NameErrorState(state.image, state.name, state.categories,
+          state.selectedCategory, "An item with this name already exists"));
+    }
+    on Exception catch (e) {
       emit(ErrorState(state.image, state.name, state.categories,
           state.selectedCategory, e.toString()));
     }

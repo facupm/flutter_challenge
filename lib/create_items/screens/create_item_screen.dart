@@ -57,6 +57,9 @@ class CreateItemScreen extends StatelessWidget {
       CustomSnackBar(
           "$errorMessage ${state.error}", context);
     }
+    if(state is NameErrorState){
+      LoadingDialog.hide(context);
+    }
   }
 
   Widget buildImagePicker(CreateItemCubit formBloc, BuildContext context) {

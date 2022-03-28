@@ -89,7 +89,7 @@ main() {
         verifyNever(() => itemsListRepositoryMock.getItems());
       });
 
-  blocTest('should emit [DeletedItemState] state when item is deleted',
+  blocTest('should emit [LoadingItemsState, DeletedItemState] state when item is deleted',
       build: () => itemsListCubit,
       act: (ItemsListCubit bloc) {
         bloc.state.items = [
@@ -105,6 +105,7 @@ main() {
             category: '', name: '', imageUrl: '', isFavorite: false));
       },
       expect: () => [
+            isA<LoadingItemsState>(),
             isA<DeletedItemState>(),
           ],
       verify: (_) {
@@ -112,7 +113,7 @@ main() {
             .called(1);
       });
 
-  blocTest('should emit [DeletedCategoryState] state when category is deleted',
+  blocTest('should emit [LoadingItemsState, DeletedCategoryState] state when category is deleted',
       build: () => itemsListCubit,
       act: (ItemsListCubit bloc) {
         bloc.state.items = [
@@ -129,6 +130,7 @@ main() {
         bloc.deleteCategory('');
       },
       expect: () => [
+            isA<LoadingItemsState>(),
             isA<DeletedCategoryState>(),
           ],
       verify: (_) {
