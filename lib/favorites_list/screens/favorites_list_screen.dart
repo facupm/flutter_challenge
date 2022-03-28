@@ -6,6 +6,7 @@ import '../../models/complete_item_model.dart';
 import 'package:flutter_challege/widgets/menu_drawer.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+import '../../utils/constants.dart';
 import '../../utils/show_custom_snackbar.dart';
 import '../../widgets/form_field_tag.dart';
 import '../cubits/favorites_list_cubit.dart';
@@ -37,7 +38,7 @@ class FavoritesListScreen extends StatelessWidget {
                 }
                 if (state is ErrorState) {
                   CustomSnackBar(
-                      "Something went wrong. Please try again: ${state.error}",
+                      "$errorMessage ${state.error}",
                       context);
                 }
                 if (state is RemovedToFavorites) {
@@ -112,8 +113,8 @@ class FavoritesListScreen extends StatelessWidget {
         SlidableAction(
           onPressed: (context) =>
               listBloc.removeFromFavorites(favoriteItem, index),
-          backgroundColor: Colors.redAccent,
-          foregroundColor: Colors.white,
+          backgroundColor: favoriteColor,
+          foregroundColor: backgroundColor,
           icon: Icons.heart_broken,
           label: 'Remove Favorite',
         ),
@@ -128,7 +129,7 @@ class FavoritesListScreen extends StatelessWidget {
       title: Text(favoriteItem.name),
       subtitle: Text(
         "Added on: ${getFormatedDate(favoriteItem.favoriteDate!)}",
-        style: const TextStyle(color: Colors.grey),
+        style: const TextStyle(color: secondaryColor),
       ),
       leading: CircleAvatar(
         backgroundImage: NetworkImage(favoriteItem.imageUrl),
@@ -140,12 +141,12 @@ class FavoritesListScreen extends StatelessWidget {
               onPressed: () =>
                   listBloc.removeFromFavorites(favoriteItem, index),
               icon: const Icon(
-                Icons.favorite,
-                color: Colors.redAccent,
+                favoriteIcon,
+                color: favoriteColor,
               )),
           ReorderableDragStartListener(
             index: index,
-            child: const Icon(Icons.drag_handle),
+            child: const Icon(dragIcon),
           ),
         ],
       ),
@@ -158,7 +159,7 @@ class FavoritesListScreen extends StatelessWidget {
         height: 40,
         child: Column(
           children: const [
-            Text('Looks like there are no favorites yet'),
+            Text('Looks like there are no favorites yet.'),
             SizedBox(
               height: 5,
             ),

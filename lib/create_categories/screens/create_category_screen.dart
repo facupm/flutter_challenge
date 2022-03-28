@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_challege/utils/constants.dart';
 import 'package:flutter_challege/widgets/loading_dialog.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
@@ -51,7 +52,7 @@ class CreateCategoryScreen extends StatelessWidget {
     if (state is ErrorState) {
       LoadingDialog.hide(context);
       CustomSnackBar(
-          "Something went wrong. Please try again: ${state.error}", context);
+          "$errorMessage ${state.error}", context);
     }
   }
 
@@ -59,15 +60,18 @@ class CreateCategoryScreen extends StatelessWidget {
     return Wrap(
       children: [
         const FormFieldTag(name: "Name"),
-        BlocBuilder(
-          bloc: formBloc,
-          builder: (context, state) => CustomTextField(
-            key: const Key("nameField"),
-            keyboard: TextInputType.name,
-            label: "Category name",
-            hint: 'Enter a category name',
-            onChange: (value) => {formBloc.changeName(value)},
-            error: state is NameErrorState ? state.error : null,
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: BlocBuilder(
+            bloc: formBloc,
+            builder: (context, state) => CustomTextField(
+              key: const Key("nameField"),
+              keyboard: TextInputType.name,
+              label: "Category name",
+              hint: 'Enter a category name',
+              onChange: (value) => {formBloc.changeName(value)},
+              error: state is NameErrorState ? state.error : null,
+            ),
           ),
         )
       ],
@@ -133,7 +137,7 @@ class CreateCategoryScreen extends StatelessWidget {
           circleSize: 40,
           color: formBloc.state.color!,
           elevation: 5,
-          iconSelected: Icons.add,
+          iconSelected: addIcon,
           isSelected: true,
         ),
       ),
@@ -171,10 +175,10 @@ class CreateCategoryScreen extends StatelessWidget {
         onPressed: () {
           formBloc.submit();
         },
-        child: const Text("Create"),
+        child: const Text(createButtonText),
         style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.black87),
+            foregroundColor: MaterialStateProperty.all<Color>(backgroundColor),
+            backgroundColor: MaterialStateProperty.all<Color>(blackColor),
             side: MaterialStateProperty.all<BorderSide>(BorderSide.none)),
       ),
     );

@@ -6,6 +6,7 @@ import '../../models/complete_item_model.dart';
 import 'package:flutter_challege/widgets/menu_drawer.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+import '../../utils/constants.dart';
 import '../../utils/show_custom_snackbar.dart';
 import '../../widgets/form_field_tag.dart';
 import '../cubits/items_list_cubit.dart';
@@ -18,7 +19,7 @@ class ItemsListScreen extends StatefulWidget {
 
 class _ItemsListScreen extends State<ItemsListScreen> {
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
-  Icon customIcon = const Icon(Icons.search);
+  Icon customIcon = const Icon(searchIcon);
   Widget customSearchBar = const Text('Shopping List');
 
   @override
@@ -49,7 +50,7 @@ class _ItemsListScreen extends State<ItemsListScreen> {
                 }
                 if (state is ErrorState) {
                   CustomSnackBar(
-                      "Something went wrong. Please try again: ${state.error}",
+                      "$errorMessage ${state.error}",
                       context);
                 }
                 if (state is AddedToFavorites) {
@@ -98,9 +99,9 @@ class _ItemsListScreen extends State<ItemsListScreen> {
           children: [
             SlidableAction(
               onPressed: (context) => deleteCategory(categoryName, listBloc),
-              backgroundColor: const Color(0xFFFE4A49),
-              foregroundColor: Colors.white,
-              icon: Icons.delete,
+              backgroundColor: deleteColor,
+              foregroundColor: backgroundColor,
+              icon: deleteIcon,
               label: 'Delete',
             ),
           ],
@@ -128,9 +129,9 @@ class _ItemsListScreen extends State<ItemsListScreen> {
           for (int index = 0; index < _items.length; index++)
             Slidable(
               key: Key('$index'),
-              endActionPane:
-                  buildAddToFavoriteActionPane(listBloc, _items[index], index),
               startActionPane:
+                  buildAddToFavoriteActionPane(listBloc, _items[index], index),
+              endActionPane:
                   buildRemoveItemActionPane(listBloc, _items[index], index),
               child: buildItemCard(listBloc, _items[index], index),
             ),
@@ -142,7 +143,8 @@ class _ItemsListScreen extends State<ItemsListScreen> {
     );
   }
 
-  Widget buildItemCard(ItemsListCubit listBloc, CompleteItemModel item, int index) {
+  Widget buildItemCard(
+      ItemsListCubit listBloc, CompleteItemModel item, int index) {
     return ListTile(
       key: Key('item$index'),
       title: Text(item.name),
@@ -156,32 +158,16 @@ class _ItemsListScreen extends State<ItemsListScreen> {
               onPressed: () => listBloc.addToFavorite(item, index),
               icon: item.isFavorite
                   ? const Icon(
-                Icons.favorite,
-                color: Colors.redAccent,
-              )
+                      favoriteIcon,
+                      color: favoriteColor,
+                    )
                   : const Icon(Icons.favorite_border)),
           ReorderableDragStartListener(
             index: index,
-            child: const Icon(Icons.drag_handle),
+            child: const Icon(dragIcon),
           ),
         ],
       ),
-    );
-  }
-
-  ActionPane buildAddToFavoriteActionPane(
-      ItemsListCubit listBloc, CompleteItemModel item, int index) {
-    return ActionPane(
-      motion: const ScrollMotion(),
-      children: [
-        SlidableAction(
-          onPressed: (context) => deleteItem(item, listBloc),
-          backgroundColor: Colors.red,
-          foregroundColor: Colors.white,
-          icon: Icons.delete,
-          label: 'Delete',
-        ),
-      ],
     );
   }
 
@@ -191,10 +177,26 @@ class _ItemsListScreen extends State<ItemsListScreen> {
       motion: const ScrollMotion(),
       children: [
         SlidableAction(
+          onPressed: (context) => deleteItem(item, listBloc),
+          backgroundColor: deleteColor,
+          foregroundColor: backgroundColor,
+          icon: deleteIcon,
+          label: 'Delete',
+        ),
+      ],
+    );
+  }
+
+  ActionPane buildAddToFavoriteActionPane(
+      ItemsListCubit listBloc, CompleteItemModel item, int index) {
+    return ActionPane(
+      motion: const ScrollMotion(),
+      children: [
+        SlidableAction(
           onPressed: (context) => listBloc.addToFavorite(item, index),
-          backgroundColor: Colors.redAccent,
-          foregroundColor: Colors.white,
-          icon: Icons.favorite,
+          backgroundColor: favoriteColor,
+          foregroundColor: backgroundColor,
+          icon: favoriteIcon,
           label: 'Favorite',
         ),
       ],
@@ -294,12 +296,12 @@ class _ItemsListScreen extends State<ItemsListScreen> {
 
   onPressSearch(ItemsListCubit listBloc) {
     setState(() {
-      if (customIcon.icon == Icons.search) {
+      if (customIcon.icon == searchIcon) {
         customIcon = const Icon(Icons.cancel);
         customSearchBar = ListTile(
           leading: const Icon(
-            Icons.search,
-            color: Colors.white,
+            searchIcon,
+            color: backgroundColor,
             size: 25,
           ),
           title: TextField(
@@ -313,14 +315,14 @@ class _ItemsListScreen extends State<ItemsListScreen> {
               border: InputBorder.none,
             ),
             style: const TextStyle(
-              color: Colors.white,
+              color: backgroundColor,
             ),
             onChanged: (value) => {listBloc.search(value)},
           ),
         );
       } else {
         listBloc.closeSearch();
-        customIcon = const Icon(Icons.search);
+        customIcon = const Icon(searchIcon);
         customSearchBar = const Text('Shopping List');
       }
     });

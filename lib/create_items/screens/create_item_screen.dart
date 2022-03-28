@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_challege/widgets/loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../utils/constants.dart';
 import '../../utils/show_custom_snackbar.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/form_field_tag.dart';
@@ -54,7 +55,7 @@ class CreateItemScreen extends StatelessWidget {
     if (state is ErrorState) {
       LoadingDialog.hide(context);
       CustomSnackBar(
-          "Something went wrong. Please try again: ${state.error}", context);
+          "$errorMessage ${state.error}", context);
     }
   }
 
@@ -70,7 +71,7 @@ class CreateItemScreen extends StatelessWidget {
                 ? Image.file(formBloc.state.image!,
                     width: 136.0, height: 136.0, fit: BoxFit.cover)
                 : const Image(
-                    image: AssetImage('assets/images/add-image-icon.png'),
+                    image: AssetImage(addImageRoute),
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover),
@@ -161,11 +162,11 @@ class CreateItemScreen extends StatelessWidget {
             onPressed: () {
               formBloc.submit();
             },
-            child: const Text("Create"),
+            child: const Text(createButtonText),
             style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                foregroundColor: MaterialStateProperty.all<Color>(backgroundColor),
                 backgroundColor:
-                    MaterialStateProperty.all<Color>(Colors.black87),
+                    MaterialStateProperty.all<Color>(blackColor),
                 side: MaterialStateProperty.all<BorderSide>(BorderSide.none)),
           ),
         )
