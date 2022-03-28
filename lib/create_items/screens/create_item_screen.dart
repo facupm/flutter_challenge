@@ -12,8 +12,6 @@ import '../cubits/create_item_cubit.dart';
 import '../repositories/create_item_repository.dart';
 
 class CreateItemScreen extends StatelessWidget {
-  final String title = 'Create Item';
-
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
   @override
@@ -22,25 +20,11 @@ class CreateItemScreen extends StatelessWidget {
       create: (context) =>
           CreateItemCubit(CreateItemRepository())..getCategories(),
       child: Builder(builder: (context) {
-        Size size = MediaQuery.of(context).size;
+        Size deviceSize = MediaQuery.of(context).size;
         final formBloc = BlocProvider.of<CreateItemCubit>(context);
         return BlocListener<CreateItemCubit, CreateItemState>(
             key: _formkey,
-            listener: (context, state) {
-              if (state is CreatedSuccessfullyState) {
-                LoadingDialog.hide(context);
-                CustomSnackBar("Item created successfully", context);
-              }
-              if (state is CreatingState) {
-                LoadingDialog.show(context);
-              }
-              if (state is ErrorState) {
-                LoadingDialog.hide(context);
-                CustomSnackBar(
-                    "Something went wrong. Please try again: ${state.error}",
-                    context);
-              }
-            },
+            listener: (context, state) => listenState(context, state),
             child: SingleChildScrollView(
               // physics: const ClampingScrollPhysics(),
               padding: const EdgeInsets.only(top: 40.0, left: 24, right: 24),
@@ -52,7 +36,7 @@ class CreateItemScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   buildCategoryDropdown(formBloc),
                   const SizedBox(height: 20),
-                  buildCreateButton(formBloc, size),
+                  buildCreateButton(formBloc, deviceSize),
                   // : CircularProgressIndicator(),
                 ],
               ),
@@ -61,7 +45,22 @@ class CreateItemScreen extends StatelessWidget {
     );
   }
 
-  buildImagePicker(CreateItemCubit formBloc, BuildContext context) {
+  void listenState(BuildContext context, CreateItemState state) {
+    if (state is CreatedSuccessfullyState) {
+      LoadingDialog.hide(context);
+      CustomSnackBar("Item created successfully", context);
+    }
+    if (state is CreatingState) {
+      LoadingDialog.show(context);
+    }
+    if (state is ErrorState) {
+      LoadingDialog.hide(context);
+      CustomSnackBar(
+          "Something went wrong. Please try again: ${state.error}", context);
+    }
+  }
+
+  Widget buildImagePicker(CreateItemCubit formBloc, BuildContext context) {
     return GestureDetector(
         onTap: () async {
           await pickImage(formBloc, context);
@@ -93,7 +92,7 @@ class CreateItemScreen extends StatelessWidget {
     }
   }
 
-  buildNameField(CreateItemCubit formBloc) {
+  Widget buildNameField(CreateItemCubit formBloc) {
     return Wrap(
       children: [
         const FormFieldTag(name: "Name"),
@@ -117,7 +116,7 @@ class CreateItemScreen extends StatelessWidget {
     );
   }
 
-  buildCategoryDropdown(CreateItemCubit formBloc) {
+  Widget buildCategoryDropdown(CreateItemCubit formBloc) {
     return Wrap(
       children: [
         const FormFieldTag(name: "Category"),
@@ -157,7 +156,7 @@ class CreateItemScreen extends StatelessWidget {
     return list.toList();
   }
 
-  buildCreateButton(CreateItemCubit formBloc, Size size) {
+  Widget buildCreateButton(CreateItemCubit formBloc, Size size) {
     return Wrap(
       children: [
         SizedBox(
