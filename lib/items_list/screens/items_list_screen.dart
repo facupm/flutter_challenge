@@ -12,7 +12,6 @@ import '../cubits/items_list_cubit.dart';
 import '../repositories/items_list_repository.dart';
 
 class ItemsListScreen extends StatefulWidget {
-
   @override
   _ItemsListScreen createState() => _ItemsListScreen();
 }
@@ -92,7 +91,6 @@ class _ItemsListScreen extends State<ItemsListScreen> {
   Widget buildItemsByCategory(List<CompleteItemModel> organizedItem,
       int categoryListIndex, ItemsListCubit listBloc) {
     var categoryName = organizedItem[0].category;
-    // var categoryColor = await listBloc.getCategoryColor(categoryName);
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => Slidable(
@@ -114,8 +112,6 @@ class _ItemsListScreen extends State<ItemsListScreen> {
           children: <Widget>[
             buildItemCards(organizedItem, categoryListIndex, listBloc)
           ],
-          // backgroundColor: Color.fromRGBO(organizedItem[0].color!.red,
-          //     organizedItem[0].color!.green, organizedItem[0].color!.blue, 99),
           collapsedBackgroundColor: organizedItem[0].color,
           textColor: organizedItem[0].color,
           initiallyExpanded: true,
@@ -129,70 +125,81 @@ class _ItemsListScreen extends State<ItemsListScreen> {
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => ReorderableListView(
-        // scrollDirection: Axis.vertical,
         shrinkWrap: true,
-        // physics: const NeverScrollableScrollPhysics(),
-        // padding: const EdgeInsets.symmetric(horizontal: 40),
         children: <Widget>[
           for (int index = 0; index < _items.length; index++)
             Slidable(
               key: Key('$index'),
-              endActionPane: ActionPane(
-                motion: const ScrollMotion(),
-                children: [
-                  SlidableAction(
-                    onPressed: (context) => deleteItem(_items[index], listBloc),
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                    icon: Icons.delete,
-                    label: 'Delete',
-                  ),
-                ],
-              ),
-              startActionPane: ActionPane(
-                motion: const ScrollMotion(),
-                children: [
-                  SlidableAction(
-                    onPressed: (context) =>
-                        listBloc.addToFavorite(_items[index], index),
-                    backgroundColor: Colors.redAccent,
-                    foregroundColor: Colors.white,
-                    icon: Icons.favorite,
-                    label: 'Favorite',
-                  ),
-                ],
-              ),
-              child: ListTile(
-                key: Key('item$index'),
-                title: Text(_items[index].name),
-                leading: CircleAvatar(
-                  backgroundImage: NetworkImage(_items[index].imageUrl),
-                ),
-                trailing: Wrap(
-                  spacing: 12,
-                  children: [
-                    IconButton(
-                        onPressed: () =>
-                            listBloc.addToFavorite(_items[index], index),
-                        icon: _items[index].isFavorite
-                            ? const Icon(
-                                Icons.favorite,
-                                color: Colors.redAccent,
-                              )
-                            : const Icon(Icons.favorite_border)),
-                    ReorderableDragStartListener(
-                      index: index,
-                      child: const Icon(Icons.drag_handle),
-                    ),
-                  ],
-                ),
-              ),
+              endActionPane:
+                  buildAddToFavoriteActionPane(listBloc, _items[index], index),
+              startActionPane:
+                  buildRemoveItemActionPane(listBloc, _items[index], index),
+              child: buildItemCard(listBloc, _items[index], index),
             ),
         ],
         onReorder: (int oldIndex, int newIndex) {
           listBloc.rearrange(categoryListIndex, oldIndex, newIndex);
         },
       ),
+    );
+  }
+
+  Widget buildItemCard(ItemsListCubit listBloc, CompleteItemModel item, int index) {
+    return ListTile(
+      key: Key('item$index'),
+      title: Text(item.name),
+      leading: CircleAvatar(
+        backgroundImage: NetworkImage(item.imageUrl),
+      ),
+      trailing: Wrap(
+        spacing: 12,
+        children: [
+          IconButton(
+              onPressed: () => listBloc.addToFavorite(item, index),
+              icon: item.isFavorite
+                  ? const Icon(
+                Icons.favorite,
+                color: Colors.redAccent,
+              )
+                  : const Icon(Icons.favorite_border)),
+          ReorderableDragStartListener(
+            index: index,
+            child: const Icon(Icons.drag_handle),
+          ),
+        ],
+      ),
+    );
+  }
+
+  ActionPane buildAddToFavoriteActionPane(
+      ItemsListCubit listBloc, CompleteItemModel item, int index) {
+    return ActionPane(
+      motion: const ScrollMotion(),
+      children: [
+        SlidableAction(
+          onPressed: (context) => deleteItem(item, listBloc),
+          backgroundColor: Colors.red,
+          foregroundColor: Colors.white,
+          icon: Icons.delete,
+          label: 'Delete',
+        ),
+      ],
+    );
+  }
+
+  ActionPane buildRemoveItemActionPane(
+      ItemsListCubit listBloc, CompleteItemModel item, int index) {
+    return ActionPane(
+      motion: const ScrollMotion(),
+      children: [
+        SlidableAction(
+          onPressed: (context) => listBloc.addToFavorite(item, index),
+          backgroundColor: Colors.redAccent,
+          foregroundColor: Colors.white,
+          icon: Icons.favorite,
+          label: 'Favorite',
+        ),
+      ],
     );
   }
 
