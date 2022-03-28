@@ -28,7 +28,6 @@ class _ItemsListScreen extends State<ItemsListScreen> {
       child: Builder(builder: (context) {
         final listBloc = BlocProvider.of<ItemsListCubit>(context);
         return Scaffold(
-            // backgroundColor: Constants.kPrimaryColor,
             appBar: AppBar(
               title: customSearchBar,
               actions: [
@@ -108,7 +107,6 @@ class _ItemsListScreen extends State<ItemsListScreen> {
         ),
         child: ExpansionTile(
           title: FormFieldTag(name: categoryName),
-          // subtitle: Text('Trailing expansion arrow icon'),
           children: <Widget>[
             buildItemCards(organizedItem, categoryListIndex, listBloc)
           ],

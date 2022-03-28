@@ -63,14 +63,11 @@ class CreateCategoryScreen extends StatelessWidget {
           bloc: formBloc,
           builder: (context, state) => CustomTextField(
             key: const Key("nameField"),
-            // bloc: formBloc.name,
-            // isEnabled: !isLoading,
             keyboard: TextInputType.name,
             label: "Category name",
             hint: 'Enter a category name',
             onChange: (value) => {formBloc.changeName(value)},
             error: state is NameErrorState ? state.error : null,
-            // icon: Icon(Icons.email)
           ),
         )
       ],
@@ -96,7 +93,6 @@ class CreateCategoryScreen extends StatelessWidget {
   Widget buildDefaultColors(CreateCategoryCubit formBloc) {
     return MaterialColorPicker(
       onMainColorChange: (ColorSwatch? color) {
-        // formBloc.color = Color(color!.value);
         formBloc.changeColor(Color(color!.value));
       },
       allowShades: false,
@@ -106,13 +102,10 @@ class CreateCategoryScreen extends StatelessWidget {
       colors: const [
         Colors.redAccent,
         Colors.deepOrangeAccent,
-        // Colors.orangeAccent,
         Colors.amberAccent,
-        // Colors.yellowAccent,
         Colors.limeAccent,
         Colors.lightGreenAccent,
         Colors.greenAccent,
-        // Colors.cyanAccent,
         Colors.lightBlueAccent,
         Colors.blueAccent,
         Colors.indigoAccent,

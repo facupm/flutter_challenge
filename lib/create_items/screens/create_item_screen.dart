@@ -26,7 +26,6 @@ class CreateItemScreen extends StatelessWidget {
             key: _formkey,
             listener: (context, state) => listenState(context, state),
             child: SingleChildScrollView(
-              // physics: const ClampingScrollPhysics(),
               padding: const EdgeInsets.only(top: 40.0, left: 24, right: 24),
               child: Column(
                 children: <Widget>[
@@ -37,7 +36,6 @@ class CreateItemScreen extends StatelessWidget {
                   buildCategoryDropdown(formBloc),
                   const SizedBox(height: 20),
                   buildCreateButton(formBloc, deviceSize),
-                  // : CircularProgressIndicator(),
                 ],
               ),
             ));
@@ -102,8 +100,6 @@ class CreateItemScreen extends StatelessWidget {
             bloc: formBloc,
             builder: (context, state) => CustomTextField(
               key: const Key("nameField"),
-              // bloc: formBloc.name,
-              // isEnabled: !isLoading,
               keyboard: TextInputType.name,
               label: "Enter a name",
               hint: 'Enter an item name',

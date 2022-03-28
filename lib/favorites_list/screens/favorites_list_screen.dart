@@ -147,7 +147,6 @@ class FavoritesListScreen extends StatelessWidget {
             index: index,
             child: const Icon(Icons.drag_handle),
           ),
-          // const Icon(Icons.drag_handle),
         ],
       ),
     );
