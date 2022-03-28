@@ -6,21 +6,20 @@ import '../../models/complete_item_model.dart';
 import 'package:flutter_challege/widgets/menu_drawer.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+import '../../utils/constants.dart';
 import '../../utils/show_custom_snackbar.dart';
 import '../../widgets/form_field_tag.dart';
 import '../cubits/items_list_cubit.dart';
 import '../repositories/items_list_repository.dart';
 
 class ItemsListScreen extends StatefulWidget {
-  final String title = 'Shopping List';
-
   @override
   _ItemsListScreen createState() => _ItemsListScreen();
 }
 
 class _ItemsListScreen extends State<ItemsListScreen> {
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
-  Icon customIcon = const Icon(Icons.search);
+  Icon customIcon = const Icon(searchIcon);
   Widget customSearchBar = const Text('Shopping List');
 
   @override
@@ -30,7 +29,6 @@ class _ItemsListScreen extends State<ItemsListScreen> {
       child: Builder(builder: (context) {
         final listBloc = BlocProvider.of<ItemsListCubit>(context);
         return Scaffold(
-            // backgroundColor: Constants.kPrimaryColor,
             appBar: AppBar(
               title: customSearchBar,
               actions: [
@@ -52,32 +50,22 @@ class _ItemsListScreen extends State<ItemsListScreen> {
                 }
                 if (state is ErrorState) {
                   CustomSnackBar(
-                      "Something went wrong. Please try again: ${state.error}",
+                      "$errorMessage ${state.error}",
                       context);
                 }
                 if (state is AddedToFavorites) {
-                  SchedulerBinding.instance?.addPostFrameCallback((_) {
-                    CustomSnackBar(
-                        "Item added to favorites successfully", context);
-                  });
+                  CustomSnackBar(
+                      "Item added to favorites successfully", context);
                 }
                 if (state is AlreadyFavoriteErrorState) {
-                  SchedulerBinding.instance?.addPostFrameCallback((_) {
-                    CustomSnackBar("Item is already on favorites", context);
-                  });
+                  CustomSnackBar("Item is already on favorites", context);
                 }
                 if (state is SearchedState &&
                     listBloc.state.searchedList.isEmpty) {
                   return buildEmptySearch();
                 }
-                if (listBloc.state.items.isEmpty) {
-                  return buildEmptyList();
-                }
                 if (state is SearchedState) {
                   return buildItemsList(listBloc, listBloc.state.searchedList);
-                }
-                if (state is LoadedItemsState) {
-                  return buildItemsList(listBloc, listBloc.state.items);
                 }
                 return buildItemsList(listBloc, listBloc.state.items);
               },
@@ -88,6 +76,9 @@ class _ItemsListScreen extends State<ItemsListScreen> {
 
   Widget buildItemsList(
       ItemsListCubit listBloc, List<List<CompleteItemModel>> organizedItems) {
+    if (listBloc.state.items.isEmpty) {
+      return buildEmptyList();
+    }
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => ListView.builder(
@@ -100,7 +91,6 @@ class _ItemsListScreen extends State<ItemsListScreen> {
   Widget buildItemsByCategory(List<CompleteItemModel> organizedItem,
       int categoryListIndex, ItemsListCubit listBloc) {
     var categoryName = organizedItem[0].category;
-    // var categoryColor = await listBloc.getCategoryColor(categoryName);
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => Slidable(
@@ -109,21 +99,18 @@ class _ItemsListScreen extends State<ItemsListScreen> {
           children: [
             SlidableAction(
               onPressed: (context) => deleteCategory(categoryName, listBloc),
-              backgroundColor: const Color(0xFFFE4A49),
-              foregroundColor: Colors.white,
-              icon: Icons.delete,
+              backgroundColor: deleteColor,
+              foregroundColor: backgroundColor,
+              icon: deleteIcon,
               label: 'Delete',
             ),
           ],
         ),
         child: ExpansionTile(
           title: FormFieldTag(name: categoryName),
-          // subtitle: Text('Trailing expansion arrow icon'),
           children: <Widget>[
             buildItemCards(organizedItem, categoryListIndex, listBloc)
           ],
-          // backgroundColor: Color.fromRGBO(organizedItem[0].color!.red,
-          //     organizedItem[0].color!.green, organizedItem[0].color!.blue, 99),
           collapsedBackgroundColor: organizedItem[0].color,
           textColor: organizedItem[0].color,
           initiallyExpanded: true,
@@ -137,70 +124,82 @@ class _ItemsListScreen extends State<ItemsListScreen> {
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => ReorderableListView(
-        // scrollDirection: Axis.vertical,
         shrinkWrap: true,
-        // physics: const NeverScrollableScrollPhysics(),
-        // padding: const EdgeInsets.symmetric(horizontal: 40),
         children: <Widget>[
           for (int index = 0; index < _items.length; index++)
             Slidable(
               key: Key('$index'),
-              endActionPane: ActionPane(
-                motion: const ScrollMotion(),
-                children: [
-                  SlidableAction(
-                    onPressed: (context) => deleteItem(_items[index], listBloc),
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                    icon: Icons.delete,
-                    label: 'Delete',
-                  ),
-                ],
-              ),
-              startActionPane: ActionPane(
-                motion: const ScrollMotion(),
-                children: [
-                  SlidableAction(
-                    onPressed: (context) =>
-                        listBloc.addToFavorite(_items[index], index),
-                    backgroundColor: Colors.redAccent,
-                    foregroundColor: Colors.white,
-                    icon: Icons.favorite,
-                    label: 'Favorite',
-                  ),
-                ],
-              ),
-              child: ListTile(
-                key: Key('item$index'),
-                title: Text(_items[index].name),
-                leading: CircleAvatar(
-                  backgroundImage: NetworkImage(_items[index].imageUrl),
-                ),
-                trailing: Wrap(
-                  spacing: 12,
-                  children: [
-                    IconButton(
-                        onPressed: () =>
-                            listBloc.addToFavorite(_items[index], index),
-                        icon: _items[index].isFavorite
-                            ? const Icon(
-                                Icons.favorite,
-                                color: Colors.redAccent,
-                              )
-                            : const Icon(Icons.favorite_border)),
-                    ReorderableDragStartListener(
-                      index: index,
-                      child: const Icon(Icons.drag_handle),
-                    ),
-                  ],
-                ),
-              ),
+              startActionPane:
+                  buildAddToFavoriteActionPane(listBloc, _items[index], index),
+              endActionPane:
+                  buildRemoveItemActionPane(listBloc, _items[index], index),
+              child: buildItemCard(listBloc, _items[index], index),
             ),
         ],
         onReorder: (int oldIndex, int newIndex) {
           listBloc.rearrange(categoryListIndex, oldIndex, newIndex);
         },
       ),
+    );
+  }
+
+  Widget buildItemCard(
+      ItemsListCubit listBloc, CompleteItemModel item, int index) {
+    return ListTile(
+      key: Key('item$index'),
+      title: Text(item.name),
+      leading: CircleAvatar(
+        backgroundImage: NetworkImage(item.imageUrl),
+      ),
+      trailing: Wrap(
+        spacing: 12,
+        children: [
+          IconButton(
+              onPressed: () => listBloc.addToFavorite(item, index),
+              icon: item.isFavorite
+                  ? const Icon(
+                      favoriteIcon,
+                      color: favoriteColor,
+                    )
+                  : const Icon(Icons.favorite_border)),
+          ReorderableDragStartListener(
+            index: index,
+            child: const Icon(dragIcon),
+          ),
+        ],
+      ),
+    );
+  }
+
+  ActionPane buildRemoveItemActionPane(
+      ItemsListCubit listBloc, CompleteItemModel item, int index) {
+    return ActionPane(
+      motion: const ScrollMotion(),
+      children: [
+        SlidableAction(
+          onPressed: (context) => deleteItem(item, listBloc),
+          backgroundColor: deleteColor,
+          foregroundColor: backgroundColor,
+          icon: deleteIcon,
+          label: 'Delete',
+        ),
+      ],
+    );
+  }
+
+  ActionPane buildAddToFavoriteActionPane(
+      ItemsListCubit listBloc, CompleteItemModel item, int index) {
+    return ActionPane(
+      motion: const ScrollMotion(),
+      children: [
+        SlidableAction(
+          onPressed: (context) => listBloc.addToFavorite(item, index),
+          backgroundColor: favoriteColor,
+          foregroundColor: backgroundColor,
+          icon: favoriteIcon,
+          label: 'Favorite',
+        ),
+      ],
     );
   }
 
@@ -297,12 +296,12 @@ class _ItemsListScreen extends State<ItemsListScreen> {
 
   onPressSearch(ItemsListCubit listBloc) {
     setState(() {
-      if (customIcon.icon == Icons.search) {
+      if (customIcon.icon == searchIcon) {
         customIcon = const Icon(Icons.cancel);
         customSearchBar = ListTile(
           leading: const Icon(
-            Icons.search,
-            color: Colors.white,
+            searchIcon,
+            color: backgroundColor,
             size: 25,
           ),
           title: TextField(
@@ -316,15 +315,15 @@ class _ItemsListScreen extends State<ItemsListScreen> {
               border: InputBorder.none,
             ),
             style: const TextStyle(
-              color: Colors.white,
+              color: backgroundColor,
             ),
             onChanged: (value) => {listBloc.search(value)},
           ),
         );
       } else {
         listBloc.closeSearch();
-        customIcon = const Icon(Icons.search);
-        customSearchBar = Text(widget.title);
+        customIcon = const Icon(searchIcon);
+        customSearchBar = const Text('Shopping List');
       }
     });
   }

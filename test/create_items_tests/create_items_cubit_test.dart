@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_challege/create_items/cubits/create_item_cubit.dart';
+import 'package:flutter_challege/create_items/exceptions/item_already_exists.dart';
 import 'package:flutter_challege/create_items/repositories/create_item_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -174,6 +175,27 @@ main() {
       verify: (_) {
         verifyNever(
             () => createItemRepositoryMock.createItem(any(), any(), any()));
+      });
+
+  blocTest('should emit [CreatingState, NameErrorState] state when name is taken',
+      build: () => createItemCubit,
+      act: (CreateItemCubit bloc) {
+        bloc.state.name = "name";
+        bloc.state.selectedCategory = "categoryName";
+        bloc.state.image = File("");
+        when(() =>
+            createItemRepositoryMock.createItem.call(any(), any(), any()))
+            .thenThrow(ItemAlreadyExistsException());
+
+        bloc.submit();
+      },
+      expect: () => [
+            isA<CreatingState>(),
+            isA<NameErrorState>(),
+          ],
+      verify: (_) {
+        verify(() => createItemRepositoryMock.createItem(any(), any(), any()))
+            .called(1);
       });
 
   blocTest(

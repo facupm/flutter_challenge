@@ -6,13 +6,13 @@ import '../../models/complete_item_model.dart';
 import 'package:flutter_challege/widgets/menu_drawer.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+import '../../utils/constants.dart';
 import '../../utils/show_custom_snackbar.dart';
 import '../../widgets/form_field_tag.dart';
 import '../cubits/favorites_list_cubit.dart';
 import '../repositories/favorites_list_repository.dart';
 
 class FavoritesListScreen extends StatelessWidget {
-  final String title = 'Favorite List';
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
   @override
@@ -24,7 +24,7 @@ class FavoritesListScreen extends StatelessWidget {
         final listBloc = BlocProvider.of<FavoritesListCubit>(context);
         return Scaffold(
             appBar: AppBar(
-              title: Text(title),
+              title: const Text('Favorite List'),
             ),
             drawer: const MenuDrawer(),
             body: BlocBuilder(
@@ -38,20 +38,15 @@ class FavoritesListScreen extends StatelessWidget {
                 }
                 if (state is ErrorState) {
                   CustomSnackBar(
-                      "Something went wrong. Please try again: ${state.error}",
+                      "$errorMessage ${state.error}",
                       context);
                 }
                 if (state is RemovedToFavorites) {
-                  SchedulerBinding.instance?.addPostFrameCallback((_) {
-                    CustomSnackBar(
-                        "Item removed from favorites successfully", context);
-                  });
+                  CustomSnackBar(
+                      "Item removed from favorites successfully", context);
                 }
                 if (listBloc.state.favorites.isEmpty) {
                   return buildEmptyList();
-                }
-                if (state is LoadedFavoritesState) {
-                  return buildFavoritesList(listBloc, listBloc.state.favorites);
                 }
                 return buildFavoritesList(listBloc, listBloc.state.favorites);
               },
@@ -74,17 +69,13 @@ class FavoritesListScreen extends StatelessWidget {
   Widget buildFavoritesByCategory(List<CompleteItemModel> organizedItem,
       int categoryListIndex, FavoritesListCubit listBloc) {
     var categoryName = organizedItem[0].category;
-    // var categoryColor = await listBloc.getCategoryColor(categoryName);
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => ExpansionTile(
         title: FormFieldTag(name: categoryName),
-        // subtitle: Text('Trailing expansion arrow icon'),
         children: <Widget>[
           buildItemCards(organizedItem, categoryListIndex, listBloc)
         ],
-        // backgroundColor: Color.fromRGBO(organizedItem[0].color!.red,
-        //     organizedItem[0].color!.green, organizedItem[0].color!.blue, 99),
         collapsedBackgroundColor: organizedItem[0].color,
         textColor: organizedItem[0].color,
         initiallyExpanded: true,
@@ -97,60 +88,67 @@ class FavoritesListScreen extends StatelessWidget {
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => ReorderableListView(
-        // scrollDirection: Axis.vertical,
         shrinkWrap: true,
-        // physics: const NeverScrollableScrollPhysics(),
-        // padding: const EdgeInsets.symmetric(horizontal: 40),
         children: <Widget>[
           for (int index = 0; index < _favorites.length; index++)
             Slidable(
               key: Key('$index'),
-              endActionPane: ActionPane(
-                motion: const ScrollMotion(),
-                children: [
-                  SlidableAction(
-                    onPressed: (context) =>
-                        listBloc.removeFromFavorites(_favorites[index], index),
-                    backgroundColor: Colors.redAccent,
-                    foregroundColor: Colors.white,
-                    icon: Icons.heart_broken,
-                    label: 'Remove Favorite',
-                  ),
-                ],
-              ),
-              child: ListTile(
-                key: Key('item$index'),
-                title: Text(_favorites[index].name),
-                subtitle: Text(
-                  "Added on: ${getFormatedDate(_favorites[index].favoriteDate!)}",
-                  style: const TextStyle(color: Colors.grey),
-                ),
-                leading: CircleAvatar(
-                  backgroundImage: NetworkImage(_favorites[index].imageUrl),
-                ),
-                trailing: Wrap(
-                  spacing: 12,
-                  children: [
-                    IconButton(
-                        onPressed: () => listBloc.removeFromFavorites(
-                            _favorites[index], index),
-                        icon: const Icon(
-                          Icons.favorite,
-                          color: Colors.redAccent,
-                        )),
-                    ReorderableDragStartListener(
-                      index: index,
-                      child: const Icon(Icons.drag_handle),
-                    ),
-                    // const Icon(Icons.drag_handle),
-                  ],
-                ),
-              ),
+              endActionPane: buildRemoveFavoriteActionPane(
+                  listBloc, _favorites[index], index),
+              child: buildItemCard(listBloc, _favorites[index], index),
             ),
         ],
         onReorder: (int oldIndex, int newIndex) {
           listBloc.rearrange(categoryListIndex, oldIndex, newIndex);
         },
+      ),
+    );
+  }
+
+  ActionPane buildRemoveFavoriteActionPane(
+      FavoritesListCubit listBloc, CompleteItemModel favoriteItem, int index) {
+    return ActionPane(
+      motion: const ScrollMotion(),
+      children: [
+        SlidableAction(
+          onPressed: (context) =>
+              listBloc.removeFromFavorites(favoriteItem, index),
+          backgroundColor: favoriteColor,
+          foregroundColor: backgroundColor,
+          icon: Icons.heart_broken,
+          label: 'Remove Favorite',
+        ),
+      ],
+    );
+  }
+
+  Widget buildItemCard(
+      FavoritesListCubit listBloc, CompleteItemModel favoriteItem, int index) {
+    return ListTile(
+      key: Key('item$index'),
+      title: Text(favoriteItem.name),
+      subtitle: Text(
+        "Added on: ${getFormatedDate(favoriteItem.favoriteDate!)}",
+        style: const TextStyle(color: secondaryColor),
+      ),
+      leading: CircleAvatar(
+        backgroundImage: NetworkImage(favoriteItem.imageUrl),
+      ),
+      trailing: Wrap(
+        spacing: 12,
+        children: [
+          IconButton(
+              onPressed: () =>
+                  listBloc.removeFromFavorites(favoriteItem, index),
+              icon: const Icon(
+                favoriteIcon,
+                color: favoriteColor,
+              )),
+          ReorderableDragStartListener(
+            index: index,
+            child: const Icon(dragIcon),
+          ),
+        ],
       ),
     );
   }
@@ -161,7 +159,7 @@ class FavoritesListScreen extends StatelessWidget {
         height: 40,
         child: Column(
           children: const [
-            Text('Looks like there are no favorites yet'),
+            Text('Looks like there are no favorites yet.'),
             SizedBox(
               height: 5,
             ),

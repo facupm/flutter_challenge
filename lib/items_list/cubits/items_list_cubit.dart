@@ -53,44 +53,52 @@ class ItemsListCubit extends Cubit<ItemsListState> {
   }
 
   Future<void> deleteItem(CompleteItemModel item) async {
-    var categoryIndex = 0;
-    var itemIndex = 0;
-    for (var list in state.items) {
-      if (list[0].category == item.category) {
-        for (var itemInList in list) {
-          if (itemInList.name == item.name) {
-            break;
+    try{
+      emit(LoadingItemsState(state.items));
+      var categoryIndex = 0;
+      var itemIndex = 0;
+      for (var list in state.items) {
+        if (list[0].category == item.category) {
+          for (var itemInList in list) {
+            if (itemInList.name == item.name) {
+              break;
+            }
+            itemIndex++;
           }
-          itemIndex++;
+          break;
         }
-        break;
+        categoryIndex++;
       }
-      categoryIndex++;
+      state.items[categoryIndex].removeAt(itemIndex);
+      state.items.removeWhere((element) => element.isEmpty);
+      await _itemsListRepository.deleteItem(item.name, item.imageUrl);
+      emit(DeletedItemState(state.items));
+    }catch (e){
+      emit(ErrorState(state.items, e.toString()));
     }
-    state.items[categoryIndex].removeAt(itemIndex);
-    // state.items
-    //     .map((e) => e.removeWhere((element) => element.name == item.name));
-    state.items.removeWhere((element) => element.isEmpty);
-    await _itemsListRepository.deleteItem(item.name, item.imageUrl);
-    emit(DeletedItemState(state.items));
   }
 
   Future<void> deleteCategory(String categoryName) async {
-    var categoryItems = [];
-    var index = 0;
-    for (var list in state.items) {
-      if (list[0].category == categoryName) {
-        categoryItems = list;
-        break;
+    try{
+      emit(LoadingItemsState(state.items));
+      var categoryItems = [];
+      var index = 0;
+      for (var list in state.items) {
+        if (list[0].category == categoryName) {
+          categoryItems = list;
+          break;
+        }
+        index++;
       }
-      index++;
+      for (var item in categoryItems) {
+        await _itemsListRepository.deleteItem(item.name, item.imageUrl);
+      }
+      state.items.removeAt(index);
+      await _itemsListRepository.deleteCategory(categoryName);
+      emit(DeletedCategoryState(state.items));
+    }catch (e){
+      emit(ErrorState(state.items, e.toString()));
     }
-    for (var item in categoryItems) {
-      await _itemsListRepository.deleteItem(item.name, item.imageUrl);
-    }
-    state.items.removeAt(index);
-    await _itemsListRepository.deleteCategory(categoryName);
-    emit(DeletedCategoryState(state.items));
   }
 
   search(String value) {
