@@ -12,7 +12,6 @@ import '../cubits/items_list_cubit.dart';
 import '../repositories/items_list_repository.dart';
 
 class ItemsListScreen extends StatefulWidget {
-  final String title = 'Shopping List';
 
   @override
   _ItemsListScreen createState() => _ItemsListScreen();
@@ -56,28 +55,18 @@ class _ItemsListScreen extends State<ItemsListScreen> {
                       context);
                 }
                 if (state is AddedToFavorites) {
-                  SchedulerBinding.instance?.addPostFrameCallback((_) {
-                    CustomSnackBar(
-                        "Item added to favorites successfully", context);
-                  });
+                  CustomSnackBar(
+                      "Item added to favorites successfully", context);
                 }
                 if (state is AlreadyFavoriteErrorState) {
-                  SchedulerBinding.instance?.addPostFrameCallback((_) {
-                    CustomSnackBar("Item is already on favorites", context);
-                  });
+                  CustomSnackBar("Item is already on favorites", context);
                 }
                 if (state is SearchedState &&
                     listBloc.state.searchedList.isEmpty) {
                   return buildEmptySearch();
                 }
-                if (listBloc.state.items.isEmpty) {
-                  return buildEmptyList();
-                }
                 if (state is SearchedState) {
                   return buildItemsList(listBloc, listBloc.state.searchedList);
-                }
-                if (state is LoadedItemsState) {
-                  return buildItemsList(listBloc, listBloc.state.items);
                 }
                 return buildItemsList(listBloc, listBloc.state.items);
               },
@@ -88,6 +77,9 @@ class _ItemsListScreen extends State<ItemsListScreen> {
 
   Widget buildItemsList(
       ItemsListCubit listBloc, List<List<CompleteItemModel>> organizedItems) {
+    if (listBloc.state.items.isEmpty) {
+      return buildEmptyList();
+    }
     return BlocBuilder(
       bloc: listBloc,
       builder: (context, state) => ListView.builder(
@@ -324,7 +316,7 @@ class _ItemsListScreen extends State<ItemsListScreen> {
       } else {
         listBloc.closeSearch();
         customIcon = const Icon(Icons.search);
-        customSearchBar = Text(widget.title);
+        customSearchBar = const Text('Shopping List');
       }
     });
   }
